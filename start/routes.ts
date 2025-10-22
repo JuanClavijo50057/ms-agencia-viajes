@@ -20,3 +20,4 @@
 
 
 import './routes/Cities'
+import './routes/Department'

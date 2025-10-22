@@ -1,17 +1,14 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'cities'
+  protected tableName = 'departments'
 
-  public async up() {
+  public async up () {
     this.schema.createTable(this.tableName, (table) => {
-      table.integer('id').unsigned().primary()
+      table.increments('id')
       table.string('name', 255).notNullable()
-      table.integer('department_id')
-        .unsigned()
-        .references('id')
-        .inTable('departments')
-        .notNullable()
+      table.integer('population').notNullable()
+
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
@@ -20,7 +17,7 @@ export default class extends BaseSchema {
     })
   }
 
-  public async down() {
+  public async down () {
     this.schema.dropTable(this.tableName)
   }
 }

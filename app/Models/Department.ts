@@ -1,17 +1,17 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
-import Department from './Department'
+import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import City from './City'
 
-export default class City extends BaseModel {
+export default class Department extends BaseModel {
   @column({ isPrimary: true })
   public id: number
   @column()
   public name: string
   @column()
-  public department_id: number
-  @belongsTo(() => Department,
+  public population: number
+  @hasMany(() => City,
     { foreignKey: 'department_id' })
-  public department: BelongsTo<typeof Department>
+  public cities: HasMany<typeof City>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
