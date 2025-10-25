@@ -21,3 +21,6 @@
 
 import './routes/Cities'
 import './routes/Department'
+import './routes/Airline'
+import './routes/Plane'
+import './routes/Vehicle'
