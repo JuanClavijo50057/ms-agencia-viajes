@@ -19,4 +19,14 @@ export default class DepartmentsController {
             console.log(error);
         }
     }
+    public async findAll({ response }: HttpContextContract) {
+        try {
+            const departments = await Department.all();
+            return response.status(200).send(departments);
+        } catch (error) {
+            response.status(500).send('Error fetching departments');
+            console.log(error);
+        }
+    }
+
 }
