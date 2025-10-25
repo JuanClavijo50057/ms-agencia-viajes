@@ -12,6 +12,8 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('vehicles')
         .onDelete('CASCADE')
+      table.string('license_plate').unique()
+
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
