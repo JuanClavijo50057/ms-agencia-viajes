@@ -7,7 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.string('brand').notNullable()
-      table.enum('tipo', ['carro', 'aeronave']).notNullable()
+      table.enum('type', ['carro', 'aeronave']).notNullable()
       table.integer('model').notNullable()
       table.string('color').notNullable()
       table.integer('capacity').notNullable()
