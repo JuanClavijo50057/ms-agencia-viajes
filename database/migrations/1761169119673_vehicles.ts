@@ -10,9 +10,7 @@ export default class extends BaseSchema {
       table.enum('tipo', ['carro', 'aeronave']).notNullable()
       table.integer('model').notNullable()
       table.string('color').notNullable()
-      table.string('license_plate').notNullable().unique()
       table.integer('capacity').notNullable()
-      table.integer('gps_id').unsigned().references('id').inTable('gps')
       
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
