@@ -12,6 +12,11 @@ export default class extends BaseSchema {
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
+      table.integer('vehicle_id')
+        .unsigned()
+        .references('id')
+        .inTable('vehicles')
+        .notNullable()
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
     })
