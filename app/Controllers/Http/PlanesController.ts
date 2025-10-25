@@ -3,6 +3,7 @@ import { CreatePlaneDTO } from 'App/DTOs/Plane/createPlaneDTO';
 
 import Plane from "App/Models/Plane";
 import PlaneService from "App/Services/PlaneService";
+import PlaneValidator from 'App/Validators/PlaneValidator';
 
 export default class PlanesController {
     public static async findPlanesByAirline({ params, response }: HttpContextContract) {
@@ -18,15 +19,8 @@ export default class PlanesController {
         }
     }
     public async create({ request, response }: HttpContextContract) {
-        const body: CreatePlaneDTO = request.only([
-            'brand',
-            'model',
-            'capacity',
-            'color',
-            'airline_id',
-        ])
+        const body: CreatePlaneDTO = await request.validate(PlaneValidator);
         try {
-
             const plane = await PlaneService.createPlane(body);
             return response.status(201).send(plane);
         } catch (error) {
