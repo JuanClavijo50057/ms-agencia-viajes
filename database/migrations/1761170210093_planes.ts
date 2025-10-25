@@ -13,6 +13,7 @@ export default class extends BaseSchema {
         .inTable('vehicles')
         .onDelete('CASCADE')
 
+      table.integer('airline_id').unsigned().references('id').inTable('airlines').onDelete('CASCADE')
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
