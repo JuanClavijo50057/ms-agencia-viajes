@@ -1,9 +1,9 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Vehicle from "App/Models/Vehicle";
 
 export default class VehiclesController {
-    public async create({ request, response }: any) {
+    public async create({ request, response }: HttpContextContract) {
         const body = request.body();
         try {
             const vehicle = await Vehicle.create(body);
@@ -13,7 +13,7 @@ export default class VehiclesController {
             return response.status(500).send('Error creating vehicle');
         }
     }
-    public async update({ params, request, response }: any) {
+    public async update({ params, request, response }: HttpContextContract) {
         const body = request.body();
         try {
             const vehicle = await Vehicle.find(params.id);
@@ -29,7 +29,7 @@ export default class VehiclesController {
             return response.status(500).send('Error updating vehicle');
         }
     }
-    public async delete({ params, response }: any) {
+    public async delete({ params, response }: HttpContextContract) {
         try {
             const vehicle = await Vehicle.find(params.id);
             if (vehicle) {
@@ -43,7 +43,7 @@ export default class VehiclesController {
             return response.status(500).send('Error deleting vehicle');
         }
     }
-    public async findAll({ response }: any) {
+    public async findAll({ response }: HttpContextContract) {
         try {
             const vehicles = await Vehicle.all();
             return response.status(200).send(vehicles);
