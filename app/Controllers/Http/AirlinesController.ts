@@ -1,6 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Airline from "App/Models/Airline";
+import AirlineValidator from 'App/Validators/AirlineValidator';
 
 export default class AirlinesController {
     public async find({ params, request, response }: HttpContextContract) {
@@ -28,7 +29,7 @@ export default class AirlinesController {
         }
     }
     public async create({ request, response }: HttpContextContract) {
-        const body = request.body();
+        const body = await request.validate(AirlineValidator);
         try {
             const airline = await Airline.create(body);
             return response.status(201).send(airline);
