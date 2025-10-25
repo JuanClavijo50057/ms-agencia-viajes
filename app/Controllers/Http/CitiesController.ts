@@ -21,7 +21,7 @@ export default class CitiesController {
             return response.status(400).send('Department ID is required');
         }
         try {
-            const cities = await City.query().where('department_id', params.idDepartment);
+            const cities = await City.query().where('department_id', params.idDepartment).select('id', 'name');
             return response.status(200).send(cities);
         } catch (error) {
             response.status(500).send('Error fetching cities');
