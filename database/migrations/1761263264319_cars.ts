@@ -13,6 +13,7 @@ export default class extends BaseSchema {
         .inTable('vehicles')
         .onDelete('CASCADE')
       table.string('license_plate').unique()
+      table.integer('hotel_id').unsigned().references('id').inTable('hotels').notNullable()
 
 
       /**
