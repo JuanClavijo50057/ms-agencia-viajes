@@ -2,7 +2,6 @@
 
 import { CreateCarDTO } from "App/DTOs/Car/createCarDTOs";
 import Car from "App/Models/Car";
-import Vehicle from "App/Models/Vehicle";
 export default class CarProfile {
 
     public static toCarEntity(dto: CreateCarDTO, vehicleId: number): Partial<Car> {
