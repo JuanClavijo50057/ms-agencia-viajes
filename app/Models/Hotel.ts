@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import City from './City'
 import Room from './Room'
-// import Car from './Car'
+import Car from './Car'
 // import Administrator from './Administrator'
 
 export default class Hotel extends BaseModel {
@@ -48,8 +48,8 @@ export default class Hotel extends BaseModel {
   })
   public rooms: HasMany<typeof Room>
 
-  // @hasMany(() => Car,{
-  //   foreignKey: 'hotel_id'
-  // })
-  // public cars: HasMany<typeof Car>
+  @hasMany(() => Car,{
+    foreignKey: 'hotel_id'
+  })
+  public cars: HasMany<typeof Car>
 }
