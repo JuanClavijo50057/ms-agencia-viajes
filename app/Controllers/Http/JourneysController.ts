@@ -1,4 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import BadRequestException from 'App/Exceptions/BadRequestException';
+import NotFoundException from 'App/Exceptions/NotFoundException';
 
 import Journey from "App/Models/Journey";
 import JourneyValidator from 'App/Validators/JourneyValidator';
@@ -6,51 +8,45 @@ import JourneyValidator from 'App/Validators/JourneyValidator';
 export default class JourneysController {
     public async create({ request, response }: HttpContextContract) {
         const body = await request.validate(JourneyValidator);
-        try {
-            const journey = await Journey.create(body);
-            return response.status(201).send(journey);
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error creating journey');
-        }
+        const journey = await Journey.create(body);
+        return response.created(journey);
     }
     public async update({ params, request, response }: HttpContextContract) {
         const body = request.body();
-        try {
-            const journey = await Journey.find(params.id);
-            if (journey) {
-                journey.merge(body);
-                await journey.save();
-                return response.status(200).send(journey);
-            } else {
-                return response.status(404).send('Journey not found');
-            }
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error updating journey');
+        if (!params.id) {
+            throw new BadRequestException('Journey ID is required');
         }
+        const journey = await Journey.find(params.id);
+        if (!journey) {
+            throw new NotFoundException('Journey not found');
+        }
+        journey.merge(body);
+        await journey.save();
+        return response.ok({
+            status: 'success',
+            message: 'Journey updated successfully',
+            data: journey,
+        });
+
     }
     public async delete({ params, response }: HttpContextContract) {
-        try {
-            const journey = await Journey.find(params.id);
-            if (journey) {
-                await journey.delete();
-                return response.status(200).send('Journey deleted successfully');
-            } else {
-                return response.status(404).send('Journey not found');
-            }
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error deleting journey');
+        if (!params.id) {
+            throw new BadRequestException('Journey ID is required');
         }
+        const journey = await Journey.find(params.id);
+        if (!journey) {
+            throw new NotFoundException('Journey not found');
+        }
+        await journey.delete();
+        return response.ok({
+            status: 'success',
+            message: 'Journey deleted successfully',
+        });
+
     }
-    public  async findAll({response}:HttpContextContract){
-        try {
-            const journeys = await Journey.all();
-            return response.status(200).send(journeys);
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error fetching journeys');
-        }
+    public async findAll({ response }: HttpContextContract) {
+        const journeys = await Journey.all();
+        return response.ok(journeys);
+
     }
 }

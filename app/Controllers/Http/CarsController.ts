@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { CreateCarDTO } from 'App/DTOs/Car/createCarDTOs';
+import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
 
 import Car from "App/Models/Car";
@@ -12,6 +13,9 @@ export default class CarsController {
         return response.ok(cars);
     }
     public async delete({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('Car ID is required');
+        }
         const car = await Car.findOrFail(params.id);
         if (!car) {
             throw new NotFoundException('Car not found');

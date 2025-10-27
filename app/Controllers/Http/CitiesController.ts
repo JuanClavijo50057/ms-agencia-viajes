@@ -1,31 +1,25 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import BadRequestException from 'App/Exceptions/BadRequestException';
 import City from 'App/Models/City';
 import axios from 'axios'
 
 export default class CitiesController {
     public async chargeCities({ response }: HttpContextContract) {
-        try {
-            const responseApi = await axios.get('https://api-colombia.com/api/v1/City?sortBy=name&sortDirection=asc')
-            const cities = responseApi.data;
+        const responseApi = await axios.get('https://api-colombia.com/api/v1/City?sortBy=name&sortDirection=asc')
+        const cities = responseApi.data;
 
-            for (const city of cities) {
-                await City.create({ id: city.id, name: city.name, department_id: city.departmentId });
-            }
-            response.status(200).send('Cities loaded successfully');
-        } catch (error) {
-            response.status(500).send('Error loading cities');
+        for (const city of cities) {
+            await City.create({ id: city.id, name: city.name, department_id: city.departmentId });
         }
+        response.created(cities);
+
     }
     public async find({ params, response }: HttpContextContract) {
         if (!params.idDepartment) {
-            return response.status(400).send('Department ID is required');
+            return new BadRequestException('Department ID is required');
         }
-        try {
-            const cities = await City.query().where('department_id', params.idDepartment).select('id', 'name');
-            return response.status(200).send(cities);
-        } catch (error) {
-            response.status(500).send('Error fetching cities');
-            console.log(error);
-        }
+        const cities = await City.query().where('department_id', params.idDepartment).select('id', 'name');
+        return response.ok(cities);
     }
 }
+

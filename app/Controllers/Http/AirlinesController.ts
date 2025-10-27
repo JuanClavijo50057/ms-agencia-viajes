@@ -1,4 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
 
 import Airline from "App/Models/Airline";
@@ -24,13 +25,16 @@ export default class AirlinesController {
         return response.created(airline);
     }
     public async update({ params, request, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('Airline ID is required')
+        }
         const airline = await Airline.find(params.id)
 
         if (!airline) {
             throw new NotFoundException('Airline not found')
         }
 
-        const data = request.only(['name', 'code', 'country']) // 🔹 evita datos no deseados
+        const data = request.only(['name', 'code', 'country']) 
         airline.merge(data)
         await airline.save()
 
@@ -41,9 +45,12 @@ export default class AirlinesController {
         })
     }
     public async delete({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new NotFoundException('Airline ID is required') 
+        }
         const airline = await Airline.find(params.id)
         if (!airline) {
-            throw new NotFoundException('Airline not found') // 👈 excepción semántica
+            throw new NotFoundException('Airline not found') 
         }
         await airline.delete()
         return response.ok({

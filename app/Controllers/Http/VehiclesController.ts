@@ -1,56 +1,51 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import BadRequestException from 'App/Exceptions/BadRequestException';
+import NotFoundException from 'App/Exceptions/NotFoundException';
 
 import Vehicle from "App/Models/Vehicle";
 
 export default class VehiclesController {
     public async create({ request, response }: HttpContextContract) {
         const body = request.body();
-        try {
-            const vehicle = await Vehicle.create(body);
-            return response.status(201).send(vehicle);
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error creating vehicle');
-        }
+        const vehicle = await Vehicle.create(body);
+        return response.created(vehicle);
+
     }
     public async update({ params, request, response }: HttpContextContract) {
         const body = request.body();
-        try {
-            const vehicle = await Vehicle.find(params.id);
-            if (vehicle) {
-                vehicle.merge(body);
-                await vehicle.save();
-                return response.status(200).send(vehicle);
-            } else {
-                return response.status(404).send('Vehicle not found');
-            }
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error updating vehicle');
+        if (!params.id) {
+            throw new BadRequestException('Vehicle ID is required');
         }
+        const vehicle = await Vehicle.find(params.id);
+        if (!vehicle) {
+            throw new NotFoundException('Vehicle not found');
+        }
+        vehicle.merge(body);
+        await vehicle.save();
+        return response.ok({
+            status: 'success',
+            message: 'Vehicle updated successfully',
+            data: vehicle,
+        });
     }
     public async delete({ params, response }: HttpContextContract) {
-        try {
-            const vehicle = await Vehicle.find(params.id);
-            if (vehicle) {
-                await vehicle.delete();
-                return response.status(200).send('Vehicle deleted successfully');
-            } else {
-                return response.status(404).send('Vehicle not found');
-            }
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error deleting vehicle');
+        if (!params.id) {
+            throw new BadRequestException('Vehicle ID is required');
         }
+        const vehicle = await Vehicle.find(params.id);
+        if (!vehicle) {
+            throw new NotFoundException('Vehicle not found');
+        }
+        await vehicle.delete();
+        return response.ok({
+            status: 'success',
+            message: 'Vehicle deleted successfully',
+        });
+
     }
     public async findAll({ response }: HttpContextContract) {
-        try {
-            const vehicles = await Vehicle.all();
-            return response.status(200).send(vehicles);
-        } catch (error) {
-            console.log(error);
-            return response.status(500).send('Error fetching vehicles');
-        }
+        const vehicles = await Vehicle.all();
+        return response.ok(vehicles);
     }
 
 }
