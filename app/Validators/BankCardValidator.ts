@@ -1,7 +1,7 @@
 import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class CustomerValidator {
+export default class BankCardValidator {
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -24,9 +24,41 @@ export default class CustomerValidator {
    *    ```
    */
   public schema = schema.create({
-    user_id: schema.number(
+    card_type: schema.enum(['debit', 'credit'] as const),
+    provider: schema.string(
       [
-        rules.exists({ table: 'users', column: 'id' })
+        rules.trim(),
+        rules.maxLength(100)
+      ]
+    ),
+    card_number: schema.string(
+      [
+        rules.trim(),
+        rules.unique({ table: 'bank_cards', column: 'card_number' }),
+      ]
+    ),
+    card_holder: schema.string(
+      [
+        rules.trim(),
+        rules.maxLength(100)
+      ]
+    ),
+    expiration_date: schema.date(
+      { format: 'yyyy-MM-dd' }
+    ),
+    cvv: schema.string(
+      [
+        rules.trim(),
+        rules.maxLength(4),
+        rules.minLength(3)
+      ]
+    ),
+    status: schema.enum(['active', 'inactive', 'blocked'] as const),
+    is_default: schema.boolean(),
+    customer_id: schema.number(
+      [
+        rules.unsigned(),
+        rules.exists({ table: 'customers', column: 'id' })
       ]
     ),
   })
@@ -42,5 +74,7 @@ export default class CustomerValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'card_type.enum': 'The card type must be either debit or credit.'
+  }
 }
