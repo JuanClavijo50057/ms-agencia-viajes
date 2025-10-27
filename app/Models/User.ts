@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Administrator from './Administrator'
+import Customer from './Customer'
+import Guide from './Guide'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -34,4 +36,14 @@ export default class User extends BaseModel {
     foreignKey: 'user_id',
   })
   public administrators: HasMany<typeof Administrator>
+
+  @hasMany(()=> Customer, {
+    foreignKey: 'user_id',
+  })
+  public customers: HasMany<typeof Customer>
+
+  @hasMany(()=> Guide, {
+    foreignKey: 'user_id',
+  })
+  public guides: HasMany<typeof Guide>
 }

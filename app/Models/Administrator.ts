@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
+import Hotel from './Hotel'
 
 export default class Administrator extends BaseModel {
   @column({ isPrimary: true })
@@ -20,6 +21,11 @@ export default class Administrator extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @hasMany(() => Hotel, {
+    foreignKey: 'administrator_id',
+  })
+  public hotels: HasMany<typeof Hotel>
 
   @belongsTo(()=> User,{
     foreignKey: 'user_id',

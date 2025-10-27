@@ -3,7 +3,7 @@ import { BaseModel, column, belongsTo, BelongsTo, hasMany, HasMany } from '@ioc:
 import City from './City'
 import Room from './Room'
 import Car from './Car'
-// import Administrator from './Administrator'
+import Administrator from './Administrator'
 
 export default class Hotel extends BaseModel {
   @column({ isPrimary: true })
@@ -38,10 +38,10 @@ export default class Hotel extends BaseModel {
   })
   public city: BelongsTo<typeof City>;
 
-  // @belongsTo(() => Administrator, {
-  //   foreignKey: "administrator_id",
-  // })
-  // public administrator: BelongsTo<typeof Administrator>;
+  @belongsTo(() => Administrator, {
+    foreignKey: "administrator_id",
+  })
+  public administrator: BelongsTo<typeof Administrator>;
 
   @hasMany(() => Room,{
     foreignKey: 'hotel_id'
