@@ -1,22 +1,16 @@
-import Database from "@ioc:Adonis/Lucid/Database";
-import { CreateCarDTO } from "App/DTOs/Car/createCarDTOs";
-import Vehicle from "App/Models/Vehicle";
-import CarProfile from "App/Profiles/CarProfile";
+import { CreateCarDTO } from 'App/DTOs/Car/createCarDTOs'
+import Car from 'App/Models/Car'
+import CarProfile from 'App/Profiles/CarProfile'
+import BaseVehicleService from './BaseVehicleService'
+import BaseVehicleProfile from 'App/Profiles/BaseVehicleProfile'
 
-export default class CarService {
-    public static async createCar(data: CreateCarDTO) {
-        const trx = await Database.transaction()
-        try {
-            const car = await CarProfile.toVehicleEntity(data)
-            const vehicle = await Vehicle.create(car, { client: trx })
-            const carData = CarProfile.toPlaneEntity(data, vehicle.id)
-            const createdCar = await Vehicle.create(carData, { client: trx })
-            await trx.commit()
-            return createdCar
-            
-        } catch (error) {
-            await trx.rollback()
-            throw error
-        }
-    }
+export default class CarService extends BaseVehicleService {
+  public static async createCar(data: CreateCarDTO) {
+    const vehicleData = BaseVehicleProfile.toVehicleEntity(data)
+
+    return this.createWithVehicle(vehicleData, async (vehicle, trx) => {
+      const carData = CarProfile.toCarEntity(data, vehicle.id)
+      return await Car.create(carData, { client: trx })
+    })
+  }
 }
