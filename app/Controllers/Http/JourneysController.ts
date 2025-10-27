@@ -1,10 +1,11 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import Journey from "App/Models/Journey";
+import JourneyValidator from 'App/Validators/JourneyValidator';
 
 export default class JourneysController {
     public async create({ request, response }: HttpContextContract) {
-        const body = request.body();
+        const body = await request.validate(JourneyValidator);
         try {
             const journey = await Journey.create(body);
             return response.status(201).send(journey);
@@ -43,7 +44,7 @@ export default class JourneysController {
             return response.status(500).send('Error deleting journey');
         }
     }
-    public static async findAll({response}:HttpContextContract){
+    public  async findAll({response}:HttpContextContract){
         try {
             const journeys = await Journey.all();
             return response.status(200).send(journeys);

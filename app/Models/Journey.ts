@@ -1,13 +1,13 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 
 export default class Journey extends BaseModel {
   @column({ isPrimary: true })
   public id: number
   @column()
-  public originId: number
+  public origin_id: number
   @column()
-  public destinationId: number
+  public destination_id: number
 
   @belongsTo(() => Journey, { foreignKey: 'origin_id' })
   public origin: BelongsTo<typeof Journey>
