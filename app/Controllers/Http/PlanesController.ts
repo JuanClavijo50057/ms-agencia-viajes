@@ -61,7 +61,7 @@ export default class PlanesController {
     }
     public async findAll({ response }: HttpContextContract) {
         try {
-            const planes = await Plane.query().preload('airline').preload('vehicle');
+            const planes = await Plane.query().preload('airline').preload('vehicle',(q)=>q.preload('gps'));
             return response.status(200).send(planes);
         } catch (error) {
             console.log(error);
