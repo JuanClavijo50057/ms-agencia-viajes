@@ -10,7 +10,7 @@ export default class extends BaseSchema {
       table.string('provider').notNullable()
       table.string('card_number', 16).notNullable().unique()
       table.string('card_holder', 100).notNullable()
-      table.date('expiration_date').notNullable()
+      table.string('expiration_date', 5).notNullable()
       table.string('cvv', 4).notNullable()
       table.enum('status', ['active', 'inactive', 'blocked']).notNullable().defaultTo('active')
       table.boolean('is_default').notNullable().defaultTo(false)
