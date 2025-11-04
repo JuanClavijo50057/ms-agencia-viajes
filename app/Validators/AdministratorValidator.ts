@@ -24,19 +24,22 @@ export default class AdministratorValidator {
    *    ```
    */
   public schema = schema.create({
-    user_id: schema.number(
-      [
-        rules.unsigned(),
-        rules.exists({ table: 'users', column: 'id' }),
-        rules.unique({ table: 'administrators', column: 'user_id' }),
-      ]
-    ),
-    active: schema.enum(
-      ['Y', 'N'] as const
-    ),
-    hire_date: schema.date(
-      { format: 'yyyy-MM-dd' }
-    ),
+    name: schema.string(),
+    email: schema.string({}, [
+      rules.email(),
+      rules.unique({ table: 'users', column: 'email' }),
+    ]),
+    phone: schema.string(),
+    identification_number: schema.string(),
+    document_type: schema.string(),
+    birth_date: schema.date({ format: 'yyyy-MM-dd' }),
+    user_id: schema.number([
+      rules.unsigned(),
+      rules.exists({ table: 'users', column: 'id' }),
+      rules.unique({ table: 'administrators', column: 'user_id' }),
+    ]),
+    active: schema.enum(['Y', 'N'] as const),
+    hire_date: schema.date({ format: 'yyyy-MM-dd' }),
   })
 
   /**
