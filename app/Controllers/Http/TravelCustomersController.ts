@@ -31,4 +31,19 @@ export default class TravelCustomersController {
             data: travelCustomer,
         });
     }
+
+    public async delete({params, response}: HttpContextContract) {
+        if (!params.id) {
+            throw new Error('TravelCustomer ID is required');
+        }
+        const travelCustomer = await TravelCustomer.find(params.id);
+        if (!travelCustomer) {
+            throw new Error('TravelCustomer not found');
+        }
+        await travelCustomer.delete();
+        return response.ok({
+            status: 'success',
+            message: 'TravelCustomer deleted successfully',
+        });
+    }
 }
