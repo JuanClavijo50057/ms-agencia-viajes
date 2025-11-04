@@ -38,7 +38,7 @@ export default class AdministratorValidator {
       rules.exists({ table: 'users', column: 'id' }),
       rules.unique({ table: 'administrators', column: 'user_id' }),
     ]),
-    active: schema.enum(['Y', 'N'] as const),
+    active: schema.boolean(),
     hire_date: schema.date({ format: 'yyyy-MM-dd' }),
   })
 

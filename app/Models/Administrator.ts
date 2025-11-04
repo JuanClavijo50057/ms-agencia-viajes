@@ -11,7 +11,7 @@ export default class Administrator extends BaseModel {
   public user_id: number
 
   @column()
-  public active: 'Y' | 'N'
+  public active: boolean
 
   @column.dateTime()
   public hire_date: DateTime

@@ -13,7 +13,7 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
-      table.enum('active', ['Y', 'N']).defaultTo('Y').notNullable()
+      table.boolean('active').notNullable()
       table.date('hire_date').notNullable()
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL

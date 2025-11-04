@@ -43,9 +43,9 @@ export default class BankCardValidator {
         rules.maxLength(100)
       ]
     ),
-    expiration_date: schema.date(
-      { format: 'yyyy-MM-dd' }
-    ),
+    expiration_date: schema.string([
+      rules.regex(/^(0[1-9]|1[0-2])\/\d{2}$/) // formato MM/YY
+    ]),
     cvv: schema.string(
       [
         rules.trim(),

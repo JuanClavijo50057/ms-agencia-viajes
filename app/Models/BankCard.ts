@@ -19,8 +19,8 @@ export default class BankCard extends BaseModel {
   @column()
   public card_holder: string
 
-  @column.date()
-  public expiration_date: DateTime
+  @column()
+  public expiration_date: string
 
   @column()
   public cvv: string
