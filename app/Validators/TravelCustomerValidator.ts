@@ -24,12 +24,12 @@ export default class TravelCustomerValidator {
    *    ```
    */
   public schema = schema.create({
-    travelId: schema.number(
+    travel_id: schema.number(
       [
         rules.exists({ table: 'travels', column: 'id' }),
       ],
     ),
-    customerId: schema.number(
+    customer_id: schema.number(
       [
         rules.exists({ table: 'customers', column: 'id' }),
       ],

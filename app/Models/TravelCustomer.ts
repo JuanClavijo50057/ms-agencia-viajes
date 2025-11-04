@@ -7,6 +7,12 @@ export default class TravelCustomer extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
+  @column()
+  public travel_id: number
+
+  @column()
+  public customer_id: number
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
