@@ -8,6 +8,6 @@ export interface CreateAdministratorDTO {
     document_type: string
     birth_date: DateTime
     user_id: number
-    active: 'Y' | 'N'
+    active: boolean
     hire_date: DateTime
 }
