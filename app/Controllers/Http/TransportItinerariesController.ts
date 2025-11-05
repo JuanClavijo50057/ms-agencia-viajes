@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import TransportItinerary from 'App/Models/TransportItinerary';
+import TransportItineraryValidator from 'App/Validators/TransportItineraryValidator';
 
 export default class TransportItinerariesController {
     public async findAll({response}:HttpContextContract){
