@@ -10,10 +10,10 @@ export default class TransportItinerary extends BaseModel {
   public sequence: number
 
   @column()
-  public travelId: number
+  public travel_id: number
 
   @column()
-  public journeyId: number
+  public journey_id: number
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -22,12 +22,12 @@ export default class TransportItinerary extends BaseModel {
   public updatedAt: DateTime
 
   @belongsTo(() => Travel, {
-    foreignKey: 'travelId'
+    foreignKey: 'travel_id'
   })
   public travel: BelongsTo<typeof Travel>
 
   @belongsTo(() => Travel, {
-    foreignKey: 'journeyId'
+    foreignKey: 'journey_id'
   })
   public journey: BelongsTo<typeof Travel>
 }
