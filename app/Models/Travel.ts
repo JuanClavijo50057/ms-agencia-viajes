@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Quota from './Quota'
 import TravelCustomer from './TravelCustomer'
+import TransportItinerary from './TransportItinerary'
 
 export default class Travel extends BaseModel {
   @column({ isPrimary: true })
@@ -40,4 +41,9 @@ export default class Travel extends BaseModel {
     foreignKey: 'travel_id'
   })
   public travelCustomers: HasMany<typeof TravelCustomer>
+
+  @hasMany(() => TransportItinerary, {
+    foreignKey: 'travel_id'
+  })
+  public transportItineraries: HasMany<typeof TransportItinerary>
 }
