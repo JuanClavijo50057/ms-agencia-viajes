@@ -18,11 +18,19 @@
 |
 */
 
-
-import './routes/Cities'
-import './routes/Department'
+import './routes/Administrator'
 import './routes/Airline'
-import './routes/Plane'
-import './routes/Vehicle'
-import './routes/Journey'
+import './routes/BankCard'
+import './routes/Bill'
 import './routes/Car'
+import './routes/Cities'
+import './routes/Customer'
+import './routes/Department'
+import './routes/Journey'
+import './routes/Plane'
+import './routes/Quota'
+import './routes/TransportItinerary'
+import './routes/Travel'
+import './routes/TravelCustomer'
+import './routes/User'
+import './routes/Vehicle'
