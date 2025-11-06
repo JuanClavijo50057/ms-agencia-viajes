@@ -7,7 +7,7 @@ import CustomerValidator from 'App/Validators/CustomerValidator';
 
 export default class CustomersController {
     public async findAll({response}:HttpContextContract){
-        const customers = Customer.all();
+        const customers = await Customer.all();
         return response.ok(customers)
     }
 

@@ -4,7 +4,7 @@ import TransportItineraryValidator from 'App/Validators/TransportItineraryValida
 
 export default class TransportItinerariesController {
     public async findAll({response}:HttpContextContract){
-        const TransportItineraries = TransportItinerary.all();
+        const TransportItineraries = await TransportItinerary.all();
         return response.ok(TransportItineraries)
     }
 

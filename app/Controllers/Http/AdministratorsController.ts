@@ -9,7 +9,7 @@ import AdministratorValidator from 'App/Validators/AdministratorValidator';
 
 export default class AdministratorsController {
     public async findAll({response}: HttpContextContract){
-        const Administrators = User.all();
+        const Administrators = await User.all();
         return response.ok(Administrators)
     }
 
