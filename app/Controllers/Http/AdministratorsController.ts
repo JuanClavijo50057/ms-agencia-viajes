@@ -2,9 +2,9 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { CreateAdministratorDTO } from 'App/DTOs/Administrator/createAdministratorDTO';
 import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
-import Administrator from 'App/Models/Administrator';
 
 import User from "App/Models/User";
+import AdministratorService from 'App/Services/AdministratorService';
 import AdministratorValidator from 'App/Validators/AdministratorValidator';
 
 export default class AdministratorsController {
@@ -15,7 +15,10 @@ export default class AdministratorsController {
 
     public async create({request, response}: HttpContextContract) {
         const body:CreateAdministratorDTO = await request.validate(AdministratorValidator);
-        const administrator = Administrator.create(body);
+        const administrator = await AdministratorService.createAdministrator(body);
+        if (!administrator) {
+            throw new Error('Error creating administrator');
+        }
         return response.created(administrator);
     }
 
