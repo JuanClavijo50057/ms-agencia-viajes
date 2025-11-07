@@ -5,7 +5,7 @@ import User from 'App/Models/User';
 
 export default class UsersController {
     public async findAll({response}:HttpContextContract){
-        const Users = User.all();
+        const Users = await User.all();
         return response.ok(Users)
     }
 

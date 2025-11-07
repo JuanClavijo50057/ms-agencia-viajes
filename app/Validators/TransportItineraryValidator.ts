@@ -41,6 +41,12 @@ export default class TransportItineraryValidator {
         rules.exists({ table: 'journeys', column: 'id' }),
       ]
     ),
+    service_transportation_id: schema.number(
+      [
+        rules.unsigned(),
+        rules.exists({ table: 'service_transportations', column: 'id' }),
+      ]
+    ),
   })
 
   /**
