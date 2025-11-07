@@ -33,11 +33,6 @@ export default class AdministratorValidator {
     identification_number: schema.string(),
     document_type: schema.string(),
     birth_date: schema.date({ format: 'yyyy-MM-dd' }),
-    user_id: schema.number([
-      rules.unsigned(),
-      rules.exists({ table: 'users', column: 'id' }),
-      rules.unique({ table: 'administrators', column: 'user_id' }),
-    ]),
     active: schema.boolean(),
     hire_date: schema.date({ format: 'yyyy-MM-dd' }),
   })
@@ -54,9 +49,6 @@ export default class AdministratorValidator {
    *
    */
   public messages: CustomMessages = {
-    'user_id.required': 'The user_id field is required.',
-    'user_id.exists': 'The specified user_id does not exist.',
-    'user_id.unique': 'The specified user_id is already associated with another administrator.',
     'hire_date.required': 'The hire_date field is required.',
     'hire_date.date': 'The hire_date must be a valid date in the format YYYY-MM-DD.',
   }
