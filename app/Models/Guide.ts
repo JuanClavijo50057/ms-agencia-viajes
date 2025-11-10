@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column, hasMany, HasMany } from '@ioc:Adonis/Lucid/Orm'
 import User from './User'
+import GuideActivity from './GuideActivity'
 
 export default class Guide extends BaseModel {
   @column({ isPrimary: true })
@@ -10,10 +11,10 @@ export default class Guide extends BaseModel {
   public user_id: number
 
   @column()
-  public active: 'Y' | 'N'
+  public active: boolean
 
-  @column()
-  public hire_date: Date
+  @column.dateTime()
+  public hire_date: DateTime
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -25,4 +26,9 @@ export default class Guide extends BaseModel {
     foreignKey: 'user_id',
   })
   public user: BelongsTo<typeof User>;
+
+  @hasMany(() => GuideActivity, {
+      foreignKey: 'guide_id',
+    })
+    public guideActivities: HasMany<typeof GuideActivity>
 }

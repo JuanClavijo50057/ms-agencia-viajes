@@ -1,10 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, BelongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
-import City from './City'
+import { BaseModel, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import PlanTouristActivity from './PlanTouristActivity'
-import GuideActivity from './GuideActivity'
+import PlanTravel from './PlanTravel'
 
-export default class TouristActivity extends BaseModel {
+export default class Plan extends BaseModel {
   @column({ isPrimary: true })
   public id: number
 
@@ -15,28 +14,23 @@ export default class TouristActivity extends BaseModel {
   public description: string | null
 
   @column()
-  public city_id: number
+  public price: number
 
   @column()
-  public price: number | null
+  public duration_days: number
 
   @column()
   public is_active: boolean
 
-  @belongsTo(() => City, {
-      foreignKey: "city_id",
-  })
-  public city: BelongsTo<typeof City>;
-
   @hasMany(() => PlanTouristActivity, {
-    foreignKey: 'tourist_activity_id',
+    foreignKey: 'plan_id',
   })
   public planTouristActivities: HasMany<typeof PlanTouristActivity>
 
-  @hasMany(() => GuideActivity, {
-    foreignKey: 'tourist_activity_id',
+  @hasMany(() => PlanTravel, {
+    foreignKey: 'plan_id',
   })
-  public guideActivities: HasMany<typeof GuideActivity>
+  public planTravels: HasMany<typeof PlanTravel>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
