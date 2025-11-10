@@ -1,12 +1,13 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Travel from './Travel'
 import ServiceTransportation from './ServiceTransportation'
+import RoomTransportItinerary from './RoomTransportItinerary'
 
 export default class TransportItinerary extends BaseModel {
   @column({ isPrimary: true })
   public id: number
-  
+
   @column()
   public sequence: number
 
@@ -39,4 +40,9 @@ export default class TransportItinerary extends BaseModel {
     foreignKey: 'service_transportation_id'
   })
   public serviceTransportation: BelongsTo<typeof ServiceTransportation>
+
+  @hasMany(() => RoomTransportItinerary, {
+    foreignKey: 'transport_itinerary_id',
+  })
+  public roomTransportItineraries: HasMany<typeof RoomTransportItinerary>
 }
