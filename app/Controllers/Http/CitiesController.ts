@@ -21,5 +21,19 @@ export default class CitiesController {
         const cities = await City.query().where('department_id', params.idDepartment).select('id', 'name');
         return response.ok(cities);
     }
+    public async findByHotelAvailable({ params, response }: HttpContextContract) {
+        if (!params.idDepartment) {
+            return new BadRequestException('Department ID is required');
+        }
+        const cities = await City
+            .query()
+            .where('department_id', params.idDepartment)
+            .whereHas('hotels', (hotelQuery) => {
+                hotelQuery.whereHas('rooms', (roomQuery) => {
+                    roomQuery.where('is_available', true)
+                })
+            })
+        return response.ok(cities);
+    }
 }
 
