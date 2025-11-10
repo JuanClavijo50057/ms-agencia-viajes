@@ -4,10 +4,10 @@ import HotelValidator from 'App/Validators/HotelValidator';
 
 export default class HotelsController {
     public async getHotelsByCity({ params, response }: HttpContextContract) {
-        if (!params.idCity) {
+        if (!params.cityId) {
             return response.badRequest('City ID is required');
         }
-        const hotels = await Hotel.query().where('city_id', params.idCity)
+        const hotels = await Hotel.query().where('city_id', params.cityId)
         .whereHas('rooms', (roomQuery) => {
             roomQuery.where('is_available', true);
         });
