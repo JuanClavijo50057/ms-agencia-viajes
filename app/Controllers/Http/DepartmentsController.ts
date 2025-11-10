@@ -15,5 +15,16 @@ export default class DepartmentsController {
         const departments = await Department.all();
         return response.ok(departments);
     }
-
+    public async findDepartmentsWithAvailableHotels({ response }: HttpContextContract) {
+        const departments = await Department
+            .query()
+            .whereHas('cities', (cityQuery) => {
+                cityQuery.whereHas('hotels', (hotelQuery) => {
+                    hotelQuery.whereHas('rooms', (roomQuery) => {
+                        roomQuery.where('is_available', true)
+                    })
+                })
+            })
+        return response.ok(departments);
+    }
 }
