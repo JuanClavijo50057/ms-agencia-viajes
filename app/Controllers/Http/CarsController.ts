@@ -4,6 +4,7 @@ import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
 
 import Car from "App/Models/Car";
+import Vehicle from 'App/Models/Vehicle';
 import CarService from 'App/Services/CarService';
 import CarValidator from 'App/Validators/CarValidator';
 
@@ -30,5 +31,27 @@ export default class CarsController {
         const body: CreateCarDTO = await request.validate(CarValidator);
         const createdCar = await CarService.createCar(body);
         return response.created(createdCar);
+    }
+    public async getCarsByHotel({ params, response }: HttpContextContract) {
+        const hotelId = params.hotelId;
+        if (!hotelId) {
+            throw new BadRequestException('Hotel ID is required');
+        }
+
+        const cars = await Car
+            .query()
+            .where('cars.hotel_id', hotelId)
+            .join('vehicles', 'vehicles.id', '=', 'cars.id')
+            .select(
+                'vehicles.id',
+                'vehicles.brand',
+                'vehicles.type',
+                'vehicles.model',
+                'vehicles.color',
+                'vehicles.capacity',
+                'cars.license_plate'
+            )
+            .pojo();   
+        return response.ok(cars);
     }
 }

@@ -1,7 +1,9 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Database from '@ioc:Adonis/Lucid/Database';
 import { CreatePlaneDTO } from 'App/DTOs/Plane/createPlaneDTO';
 import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
+import Airline from 'App/Models/Airline';
 
 import Plane from "App/Models/Plane";
 import PlaneService from "App/Services/PlaneService";
@@ -54,8 +56,39 @@ export default class PlanesController {
 
     }
     public async findAll({ response }: HttpContextContract) {
-        const planes = await Plane.query().preload('airline').preload('vehicle', (q) => q.preload('gps'));
-        return response.ok(planes);
+        const rawPlanes = await Database
+            .from('planes')
+            .join('vehicles', 'vehicles.id', '=', 'planes.id')
+            .select(
+                'planes.id',
+                'planes.airline_id',
+                'vehicles.brand',
+                'vehicles.type',
+                'vehicles.model',
+                'vehicles.color',
+                'vehicles.capacity'
+            )
+
+        // 2. Preload manual (solo airline)
+        const airlineIds = rawPlanes.map(p => p.airline_id)
+
+        const airlines = await Airline
+            .query()
+            .whereIn('id', airlineIds)
+            .select('id', 'name')
+            .pojo()
+
+        const airlinesMap = Object.fromEntries(
+            airlines.map((a:Airline) => [a.id, a])
+        )
+
+        // 3. Mezclar airline anidada
+        const result = rawPlanes.map(p => ({
+            ...p,
+            airline: airlinesMap[p.airline_id] || null
+        }))
+
+        return response.ok(result)
     }
 
 }
