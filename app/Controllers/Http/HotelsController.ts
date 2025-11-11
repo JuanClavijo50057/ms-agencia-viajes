@@ -18,4 +18,8 @@ export default class HotelsController {
         const hotel = await Hotel.create(body);
         return response.created(hotel);
     }
+    public async findAll({ response }: HttpContextContract) {
+        const hotels = await Hotel.all();
+        return response.ok(hotels);
+    }
 }
