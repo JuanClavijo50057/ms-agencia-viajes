@@ -24,15 +24,6 @@ export default class CustomerValidator {
    *    ```
    */
   public schema = schema.create({
-      name: schema.string(),
-      email: schema.string({}, [
-        rules.email(),
-        rules.unique({ table: 'customers', column: 'email' }),
-      ]),
-      phone: schema.string(),
-      identification_number: schema.string(),
-      document_type: schema.string(),
-      birth_date: schema.date({ format: 'yyyy-MM-dd' }),
       user_id: schema.number([
         rules.exists({ table: 'users', column: 'id' })
       ]),
