@@ -10,6 +10,17 @@ export default class PlansController {
         return response.ok(plans)
     }
 
+    public async findById({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('Plan ID is required')
+        }
+        const plan = await Plan.find(params.id)
+        if (!plan) {
+            throw new NotFoundException('Plan not found')
+        }
+        return response.ok(plan)
+    }
+
     public async findActive({ response }: HttpContextContract) {
         const plans = await Plan.query().where('is_active', true)
         return response.ok(plans)

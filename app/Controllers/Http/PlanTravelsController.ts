@@ -10,6 +10,17 @@ export default class PlanTravelsController {
         return response.ok(planTravels)
     }
 
+    public async findById({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('PlanTravel ID is required')
+        }
+        const planTravel = await PlanTravel.find(params.id)
+        if (!planTravel) {
+            throw new NotFoundException('PlanTravel not found')
+        }
+        return response.ok(planTravel)
+    }
+
     public async findByPlan({ params, response }: HttpContextContract) {
         if (!params.planId) {
             throw new BadRequestException('Plan ID is required')

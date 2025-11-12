@@ -10,6 +10,17 @@ export default class PlanTouristActivitiesController {
         return response.ok(planTouristActivities)
     }
 
+    public async findById({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('PlanTouristActivity ID is required')
+        }
+        const planTouristActivity = await PlanTouristActivity.find(params.id)
+        if (!planTouristActivity) {
+            throw new NotFoundException('PlanTouristActivity not found')
+        }
+        return response.ok(planTouristActivity)
+    }
+
     public async findByPlan({ params, response }: HttpContextContract) {
         if (!params.planId) {
             throw new BadRequestException('Plan ID is required')
