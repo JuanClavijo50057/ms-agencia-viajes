@@ -7,5 +7,4 @@ export interface CreateCustomerDTO {
     identification_number: string
     document_type: string
     birth_date: DateTime
-    user_id: number
 } 

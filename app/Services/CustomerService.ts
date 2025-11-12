@@ -10,6 +10,7 @@ export default class CustomerService extends BaseUserService {
 
         return this.createWithUser(userData, async (user, trx) => {
             const customerData = CustomerProfile.toCustomerEntity(user.id);
+            console.log(customerData)
             return await Customer.create(customerData, { client: trx });
         });
     }
