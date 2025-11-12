@@ -5,6 +5,7 @@ Route.group(() => {
     Route.get('/active', 'PlansController.findActive')
     Route.get('/duration/:days', 'PlansController.findByDuration')
     Route.get('/price-range', 'PlansController.findByPriceRange')
+    Route.get('/:id', 'PlansController.findById')
     Route.post('/', 'PlansController.create')
     Route.put('/:id', 'PlansController.update')
     Route.delete('/:id', 'PlansController.delete')

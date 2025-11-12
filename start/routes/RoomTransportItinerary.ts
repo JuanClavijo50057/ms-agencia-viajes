@@ -4,6 +4,7 @@ Route.group(() => {
     Route.get('/', 'RoomTransportItinerariesController.findAll')
     Route.get('/room/:roomId', 'RoomTransportItinerariesController.findByRoom')
     Route.get('/transport-itinerary/:transportItineraryId', 'RoomTransportItinerariesController.findByTransportItinerary')
+    Route.get('/:id', 'RoomTransportItinerariesController.findById')
     Route.post('/', 'RoomTransportItinerariesController.create')
     Route.put('/:id', 'RoomTransportItinerariesController.update')
     Route.delete('/:id', 'RoomTransportItinerariesController.delete')

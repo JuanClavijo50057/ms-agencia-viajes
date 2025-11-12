@@ -13,4 +13,21 @@ export default class GuideService extends BaseUserService {
             return await Guide.create(guideData, { client: trx });
         });
     }
+    
+    public static async updateGuide(guide: Guide, updateGuide: CreateGuideDTO) {
+        const userData = BaseUserProfile.toUserEntity(updateGuide)
+
+        return this.updateWithUser(guide.user_id, userData, async (user, trx) => {
+            const guideRecord = await Guide.query({ client: trx })
+                .where('user_id', guide.user_id)
+                .firstOrFail()
+
+            const guideData = GuideProfile.toGuideEntity(updateGuide, user.id)
+
+            guideRecord.merge(guideData)
+            await guideRecord.useTransaction(trx).save()
+
+            return guideRecord
+        })
+    }
 }
