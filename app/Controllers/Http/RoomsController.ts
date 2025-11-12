@@ -10,6 +10,17 @@ export default class RoomsController {
         return response.ok(rooms)
     }
 
+    public async findById({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('Room ID is required')
+        }
+        const room = await Room.find(params.id)
+        if (!room) {
+            throw new NotFoundException('Room not found')
+        }
+        return response.ok(room)
+    }
+
     public async findByHotel({ params, response }: HttpContextContract) {
         if (!params.hotelId) {
             throw new BadRequestException('Hotel ID is required')

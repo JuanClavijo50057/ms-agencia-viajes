@@ -10,6 +10,17 @@ export default class RoomTransportItinerariesController {
         return response.ok(roomTransportItineraries)
     }
 
+    public async findById({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('RoomTransportItinerary ID is required')
+        }
+        const roomTransportItinerary = await RoomTransportItinerary.find(params.id)
+        if (!roomTransportItinerary) {
+            throw new NotFoundException('RoomTransportItinerary not found')
+        }
+        return response.ok(roomTransportItinerary)
+    }
+
     public async findByRoom({ params, response }: HttpContextContract) {
         if (!params.roomId) {
             throw new BadRequestException('Room ID is required')

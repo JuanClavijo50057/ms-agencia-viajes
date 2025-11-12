@@ -10,6 +10,17 @@ export default class TouristActivitiesController {
         return response.ok(activities)
     }
 
+    public async findById({ params, response }: HttpContextContract) {
+        if (!params.id) {
+            throw new BadRequestException('Activity ID is required')
+        }
+        const activity = await TouristActivity.find(params.id)
+        if (!activity) {
+            throw new NotFoundException('Tourist activity not found')
+        }
+        return response.ok(activity)
+    }
+
     public async findByCity({ params, response }: HttpContextContract) {
         if (!params.cityId) {
             throw new BadRequestException('City ID is required')

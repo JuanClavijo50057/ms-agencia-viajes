@@ -2,6 +2,7 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
     Route.get('/', 'HotelsController.findAll')
+    Route.get('/:id', 'HotelsController.findById')
     Route.get('/city/:cityId', 'HotelsController.getHotelsByCity')
     Route.get('/stars/:stars', 'HotelsController.findByStars')
     Route.post('/', 'HotelsController.create')

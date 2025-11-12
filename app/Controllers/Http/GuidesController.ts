@@ -2,14 +2,14 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { CreateGuideDTO } from 'App/DTOs/Guide/createGuideDTO';
 import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
+import Guide from 'App/Models/Guide';
 
-import User from "App/Models/User";
 import GuideService from 'App/Services/GuideService';
 import GuideValidator from 'App/Validators/GuideValidator';
 
 export default class GuidesController {
     public async findAll({ response }: HttpContextContract) {
-        const guides = await User.all();
+        const guides = await Guide.all();
         return response.ok(guides)
     }
 
@@ -23,20 +23,19 @@ export default class GuidesController {
     }
 
     public async update({ params, request, response }: HttpContextContract) {
-        const body = request.body();
+        const body: CreateGuideDTO = await request.validate(GuideValidator);
         if (!params.id) {
             throw new BadRequestException('Guide ID is required');
         }
-        const guide = await User.find(params.id);
+        const guide = await Guide.find(params.id);
         if (!guide) {
             throw new NotFoundException('Guide not found');
         }
-        guide.merge(body);
-        await guide.save();
+        const updateGuide = await GuideService.updateGuide(guide, body);
         return response.ok({
             status: 'success',
             message: 'Guide updated successfully',
-            data: guide,
+            data: updateGuide,
         });
     }
 
@@ -44,7 +43,7 @@ export default class GuidesController {
         if (!params.id) {
             throw new BadRequestException('Guide ID required')
         }
-        const guide = await User.find(params.id);
+        const guide = await Guide.find(params.id);
         if (!guide) {
             throw new NotFoundException('Guide not found');
         };
