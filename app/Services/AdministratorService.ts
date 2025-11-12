@@ -13,4 +13,22 @@ export default class AdministratorService extends BaseUserService {
             return await Administrator.create(administratorData, { client: trx });
         });
     }
+    
+    public static async updateAdministrator(admin: Administrator, updateAdministrator: CreateAdministratorDTO) {
+  const userData = BaseUserProfile.toUserEntity(updateAdministrator)
+
+  return this.updateWithUser(admin.user_id, userData, async (user, trx) => {
+    const administrator = await Administrator.query({ client: trx })
+      .where('user_id', admin.user_id)
+      .firstOrFail()
+
+    const administratorData = AdministratorProfile.toAdministratorEntity(updateAdministrator, user.id)
+
+    administrator.merge(administratorData)
+    await administrator.useTransaction(trx).save()
+
+    return administrator
+  })
+}
+
 }

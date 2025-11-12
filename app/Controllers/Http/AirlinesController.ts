@@ -34,7 +34,7 @@ export default class AirlinesController {
             throw new NotFoundException('Airline not found')
         }
 
-        const data = request.only(['name', 'code', 'country']) 
+        const data = request.only(['name', 'description']) 
         airline.merge(data)
         await airline.save()
 
