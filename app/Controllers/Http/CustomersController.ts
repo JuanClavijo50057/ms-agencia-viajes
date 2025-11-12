@@ -3,6 +3,7 @@ import { CreateCustomerDTO } from 'App/DTOs/Customer/createCustomerDTO';
 import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
 import Customer from 'App/Models/Customer';
+import CustomerService from 'App/Services/CustomerService';
 import CustomerValidator from 'App/Validators/CustomerValidator';
 
 export default class CustomersController {
@@ -13,7 +14,7 @@ export default class CustomersController {
 
     public async create({request, response}: HttpContextContract) {
         const body:CreateCustomerDTO = await request.validate(CustomerValidator);
-        const customer = Customer.create(body);
+        const customer = await CustomerService.createUser(body);
         return response.created(customer);
     }
 
