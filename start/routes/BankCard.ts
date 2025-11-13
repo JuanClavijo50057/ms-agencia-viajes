@@ -5,4 +5,4 @@ Route.group(() => {
     Route.post("/", "BankCardsController.create");
     Route.put("/:id", "BankCardsController.update");
     Route.delete("/:id", "BankCardsController.delete");
-}).prefix("/BankCard");
+}).prefix("/bank-card");
