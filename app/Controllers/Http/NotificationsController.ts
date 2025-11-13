@@ -7,7 +7,7 @@ export default class NotificationsController {
     public async alertNewNotification({ response }: HttpContextContract) {
         const drivers = await Driver.query().preload('shifts', (shiftQuery) => {
             shiftQuery.preload('vehicle', (vehicleQuery) => {
-                vehicleQuery.where('type', true)
+                vehicleQuery.where('type', "carro")
             })
         })
         response.ok({ drivers })
