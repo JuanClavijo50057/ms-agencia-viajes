@@ -7,9 +7,21 @@ import CustomerService from 'App/Services/CustomerService';
 import CustomerValidator from 'App/Validators/CustomerValidator';
 
 export default class CustomersController {
-    public async findAll({response}:HttpContextContract){
-        const customers = await Customer.all();
-        return response.ok(customers)
+    public async findAll({ response }: HttpContextContract) {
+    const customers = await Customer
+        .query()
+        .join('users', 'users.id', '=', 'customers.user_id')
+        .select(
+        'users.name',
+        'users.email',
+        'users.phone',
+        'users.identification_number',
+        'users.document_type',
+        'users.birth_date'
+        )
+        .pojo();
+
+    return response.ok(customers);
     }
 
     public async create({request, response}: HttpContextContract) {
