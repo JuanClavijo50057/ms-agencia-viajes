@@ -10,7 +10,20 @@ import GuideValidator from "App/Validators/GuideValidator";
 
 export default class GuidesController {
   public async findAll({ response }: HttpContextContract) {
-    const guides = await Guide.all();
+    const guides = await Guide.query()
+      .join("users", "users.id", "=", "guides.user_id")
+      .select(
+        "guides.id",
+        "users.name",
+        "users.email",
+        "users.phone",
+        "users.identification_number",
+        "users.document_type",
+        "users.birth_date",
+        "guides.hire_date",
+        "guides.active"
+      )
+      .pojo();
     return response.ok(guides);
   }
 
