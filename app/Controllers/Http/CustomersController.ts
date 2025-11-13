@@ -45,11 +45,6 @@ export default class CustomersController {
     }
 
     request.updateQs({ user_id: customer.user_id });
-    console.log('User ID:', customer.user_id);
-    console.log('Query String:', request.qs());
-    console.log('Request Body:', request.body()); // AGREGAR ESTO
-    console.log('Customer Email actual:', customer.user.email); // AGREGAR ESTO
-    console.log('Customer ID Number actual:', customer.user.identification_number); // AGREGAR ESTO
 
     const body: CreateCustomerDTO = await request.validate(
       CustomerUpdateValidator
