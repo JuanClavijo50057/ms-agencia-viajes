@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column, HasMany, hasMany, HasOne, hasOne } from '@ioc:Adonis/Lucid/Orm'
 import Gps from './Gps'
+import Shift from './Shift'
 
 export default class Vehicle extends BaseModel {
   @column({ isPrimary: true })
@@ -27,6 +28,11 @@ export default class Vehicle extends BaseModel {
   @hasOne(() => Gps,
     { foreignKey: 'vehicle_id' })
   public gps: HasOne<typeof Gps>
+
+  @hasMany(() => Shift, {
+    foreignKey: 'vehicle_id',
+  })
+  public shifts: HasMany<typeof Shift>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
