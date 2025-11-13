@@ -35,5 +35,9 @@ export default class CitiesController {
             })
         return response.ok(cities);
     }
+    public async findAll({ response }: HttpContextContract) {
+        const cities = await City.all();
+        return response.ok(cities);
+    }
 }
 
