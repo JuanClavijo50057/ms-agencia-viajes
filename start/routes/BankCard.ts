@@ -3,6 +3,6 @@ Route.group(() => {
     Route.get("/", "BankCardsController.findAll");
     Route.get("/customer/:idCustomer", "BankCardsController.findByCustomer");
     Route.post("/", "BankCardsController.create");
-    Route.patch("/:id", "BankCardsController.update");
+    Route.put("/:id", "BankCardsController.update");
     Route.delete("/:id", "BankCardsController.delete");
 }).prefix("/BankCard");
