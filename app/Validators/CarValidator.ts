@@ -32,9 +32,9 @@ export default class CarValidator {
     color: schema.string(),
     hotel_id: schema.number([
       rules.exists({ table: 'hotels', column: 'id' })
-    ])
+    ]),
+    license_plate: schema.string()
   })
-
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

@@ -5,4 +5,5 @@ export interface CreateCarDTO {
   capacity: number
   color: string
   hotel_id: number
+  license_plate: string
 }
