@@ -4,9 +4,9 @@ import BadRequestException from 'App/Exceptions/BadRequestException';
 import NotFoundException from 'App/Exceptions/NotFoundException';
 import Administrator from 'App/Models/Administrator';
 
-import User from "App/Models/User";
 import AdministratorService from 'App/Services/AdministratorService';
 import AdministratorValidator from 'App/Validators/AdministratorValidator';
+import AdministratorUpdateValidator from 'App/Validators/AdministratorUpdateValidator';
 
 export default class AdministratorsController {
     public async findAll({response}: HttpContextContract){
@@ -24,14 +24,21 @@ export default class AdministratorsController {
     }
 
     public async update({params, request, response}: HttpContextContract) {
-        const body:CreateAdministratorDTO = await request.validate(AdministratorValidator);
         if (!params.id) {
             throw new BadRequestException('Administrator ID is required');
         }
-        const administrator = await Administrator.find(params.id);
+        const administrator = await Administrator.query()
+            .where('id', params.id)
+            .preload('user')
+            .firstOrFail();
+
         if (!administrator) {
             throw new NotFoundException('Administrator not found');
         }
+
+        request.updateQs({ user_id: administrator.user_id });
+        const body:CreateAdministratorDTO = await request.validate(AdministratorUpdateValidator);
+
         const updateAdministrator = await AdministratorService.updateAdministrator(administrator, body);
             return response.ok({
                 status: 'success',

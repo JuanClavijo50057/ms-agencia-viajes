@@ -3,6 +3,6 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.group(() => {
     Route.get('/', 'GuidesController.findAll')
     Route.post('/', 'GuidesController.create')
-    Route.put('/:id', 'GuidesController.update')
+    Route.patch('/:id', 'GuidesController.update')
     Route.delete('/:id', 'GuidesController.delete')
 }).prefix('/guides')
