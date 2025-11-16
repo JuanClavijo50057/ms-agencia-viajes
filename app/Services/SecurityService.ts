@@ -1,0 +1,42 @@
+import axios, { AxiosError } from "axios";
+import Env from "@ioc:Adonis/Core/Env";
+import NotFoundException from "App/Exceptions/NotFoundException";
+import BadRequestException from "App/Exceptions/BadRequestException";
+
+interface SecurityUser {
+  _id: string;
+  name: string;
+  email: string;
+  isOauth: boolean;
+}
+
+export default class SecurityService {
+  private static baseUrl = Env.get("MS_SECURITY");
+
+  public static async getUserById(userId: string): Promise<SecurityUser> {
+    const response = await axios
+      .get<SecurityUser>(`${this.baseUrl}/api/users/${userId}`)
+      .catch((error: AxiosError) => {
+        if (error.response?.status === 404) {
+          throw new NotFoundException(
+            `User with ID ${userId} not found in security service`
+          );
+        }
+        if (error.response?.status === 400) {
+          throw new BadRequestException("Invalid user ID format");
+        }
+        throw new BadRequestException("Unable to connect to security service");
+      });
+
+    return response.data;
+  }
+
+  public static async getUserEmail(userId: string): Promise<string> {
+    const user = await this.getUserById(userId);
+    return user.email;
+  }
+
+  public static async validateUserExists(userId: string): Promise<void> {
+    await this.getUserById(userId);
+  }
+}
