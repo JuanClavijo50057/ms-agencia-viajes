@@ -24,16 +24,12 @@ export default class CustomerValidator {
    *    ```
    */
   public schema = schema.create({
-      name: schema.string(),
-      email: schema.string({}, [
-        rules.email(),
-        rules.unique({ table: 'users', column: 'email' }),
-      ]),
-      phone: schema.string(),
-      identification_number: schema.string(),
-      document_type: schema.string(),
-      birth_date: schema.date({ format: 'yyyy-MM-dd' }),
-    })
+    user_id: schema.string({}, [
+      rules.unique({ table: 'customers', column: 'user_id' }),
+      rules.minLength(24),
+      rules.maxLength(24),
+    ]),
+  })
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
@@ -46,5 +42,10 @@ export default class CustomerValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'user_id.required': 'User ID is required',
+    'user_id.unique': 'This user is already registered as a customer',
+    'user_id.minLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+    'user_id.maxLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+  }
 }

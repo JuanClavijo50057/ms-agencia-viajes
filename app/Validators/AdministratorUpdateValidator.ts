@@ -23,26 +23,20 @@ export default class AdministratorUpdateValidator {
    *     ])
    *    ```
    */
+  public refs = schema.refs({
+    administratorId: this.ctx.params.id
+  })
+
   public schema = schema.create({
-    name: schema.string(),
-    email: schema.string({}, [
-      rules.email(),
+    user_id: schema.string({}, [
       rules.unique({
-        table: 'users',
-        column: 'email',
-        whereNot: { id: this.ctx.request.qs().user_id }
+        table: 'administrators',
+        column: 'user_id',
+        whereNot: { id: this.refs.administratorId }
       }),
+      rules.minLength(24),
+      rules.maxLength(24),
     ]),
-    phone: schema.string(),
-    identification_number: schema.string({}, [
-      rules.unique({
-        table: 'users',
-        column: 'identification_number',
-        whereNot: { id: this.ctx.request.qs().user_id }
-      }),
-    ]),
-    document_type: schema.string(),
-    birth_date: schema.date({ format: 'yyyy-MM-dd' }),
     active: schema.boolean(),
     hire_date: schema.date({ format: 'yyyy-MM-dd' }),
   })
@@ -58,5 +52,13 @@ export default class AdministratorUpdateValidator {
    * }
    *
    */
-  public messages: CustomMessages = {}
+  public messages: CustomMessages = {
+    'user_id.required': 'User ID is required',
+    'user_id.unique': 'This user is already registered as an administrator',
+    'user_id.minLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+    'user_id.maxLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+    'active.required': 'Active status is required',
+    'hire_date.required': 'Hire date is required',
+    'hire_date.date': 'Hire date must be a valid date in the format YYYY-MM-DD',
+  }
 }

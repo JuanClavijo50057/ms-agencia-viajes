@@ -1,34 +1,28 @@
-import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
-import User from './User'
-import Hotel from './Hotel'
+import { DateTime } from "luxon";
+import { BaseModel, column, HasMany, hasMany } from "@ioc:Adonis/Lucid/Orm";
+import Hotel from "./Hotel";
 
 export default class Administrator extends BaseModel {
   @column({ isPrimary: true })
-  public id: number
+  public id: number;
 
   @column()
-  public user_id: number
+  public user_id: string;
 
   @column()
-  public active: boolean
+  public active: boolean;
 
   @column.dateTime()
-  public hire_date: DateTime
+  public hire_date: DateTime;
 
   @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
+  public createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
+  public updatedAt: DateTime;
 
   @hasMany(() => Hotel, {
-    foreignKey: 'administrator_id',
+    foreignKey: "administrator_id",
   })
-  public hotels: HasMany<typeof Hotel>
-
-  @belongsTo(()=> User,{
-    foreignKey: 'user_id',
-  })
-  public user: BelongsTo<typeof User>
+  public hotels: HasMany<typeof Hotel>;
 }

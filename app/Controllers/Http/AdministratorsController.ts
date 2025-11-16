@@ -1,40 +1,37 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { CreateAdministratorDTO } from "App/DTOs/Administrator/createAdministratorDTO";
 import BadRequestException from "App/Exceptions/BadRequestException";
 import NotFoundException from "App/Exceptions/NotFoundException";
 import Administrator from "App/Models/Administrator";
-
-import AdministratorService from "App/Services/AdministratorService";
 import AdministratorValidator from "App/Validators/AdministratorValidator";
 import AdministratorUpdateValidator from "App/Validators/AdministratorUpdateValidator";
+import SecurityService from "App/Services/SecurityService";
 
 export default class AdministratorsController {
   public async findAll({ response }: HttpContextContract) {
-    const Administrators = await Administrator.query()
-      .join("users", "users.id", "=", "administrators.user_id")
-      .select(
-        "administrators.id",
-        "users.name",
-        "users.email",
-        "users.phone",
-        "users.identification_number",
-        "users.document_type",
-        "users.birth_date",
-        "administrators.hire_date",
-        "administrators.active"
-      )
-      .pojo();
-    return response.ok(Administrators);
+    const administrators = await Administrator.all();
+    return response.ok(administrators);
+  }
+
+  public async findByIdWithUser({ params, response }: HttpContextContract) {
+    if (!params.id) {
+      throw new BadRequestException("Administrator ID is required");
+    }
+
+    const administrator = await Administrator.findOrFail(params.id);
+    const userInfo = await SecurityService.getUserById(administrator.user_id);
+
+    return response.ok({
+      ...administrator.toJSON(),
+      user: userInfo,
+    });
   }
 
   public async create({ request, response }: HttpContextContract) {
-    const body: CreateAdministratorDTO = await request.validate(
-      AdministratorValidator
-    );
-    const administrator = await AdministratorService.createAdministrator(body);
-    if (!administrator) {
-      throw new Error("Error creating administrator");
-    }
+    const body = await request.validate(AdministratorValidator);
+
+    await SecurityService.validateUserExists(body.user_id);
+
+    const administrator = await Administrator.create(body);
     return response.created(administrator);
   }
 
@@ -42,28 +39,19 @@ export default class AdministratorsController {
     if (!params.id) {
       throw new BadRequestException("Administrator ID is required");
     }
-    const administrator = await Administrator.query()
-      .where("id", params.id)
-      .preload("user")
-      .firstOrFail();
 
-    if (!administrator) {
-      throw new NotFoundException("Administrator not found");
-    }
+    const administrator = await Administrator.findOrFail(params.id);
+    const body = await request.validate(AdministratorUpdateValidator);
 
-    request.updateQs({ user_id: administrator.user_id });
-    const body: CreateAdministratorDTO = await request.validate(
-      AdministratorUpdateValidator
-    );
+    await SecurityService.validateUserExists(body.user_id);
 
-    const updateAdministrator = await AdministratorService.updateAdministrator(
-      administrator,
-      body
-    );
+    administrator.merge(body);
+    await administrator.save();
+
     return response.ok({
       status: "success",
       message: "Administrator updated successfully",
-      data: updateAdministrator,
+      data: administrator,
     });
   }
 
@@ -71,11 +59,10 @@ export default class AdministratorsController {
     if (!params.id) {
       throw new BadRequestException("Administrator ID required");
     }
-    const administrator = await Administrator.find(params.id);
-    if (!administrator) {
-      throw new NotFoundException("Administrator not found");
-    }
+
+    const administrator = await Administrator.findOrFail(params.id);
     await administrator.delete();
+
     return response.ok({
       status: "success",
       message: "Administrator deleted successfully",

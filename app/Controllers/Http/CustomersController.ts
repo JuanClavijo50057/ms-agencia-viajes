@@ -1,33 +1,36 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { CreateCustomerDTO } from "App/DTOs/Customer/createCustomerDTO";
 import BadRequestException from "App/Exceptions/BadRequestException";
-import NotFoundException from "App/Exceptions/NotFoundException";
 import Customer from "App/Models/Customer";
-import CustomerService from "App/Services/CustomerService";
 import CustomerValidator from "App/Validators/CustomerValidator";
 import CustomerUpdateValidator from "App/Validators/CustomerUpdateValidator";
+import SecurityService from "App/Services/SecurityService";
 
 export default class CustomersController {
   public async findAll({ response }: HttpContextContract) {
-    const customers = await Customer.query()
-      .join("users", "users.id", "=", "customers.user_id")
-      .select(
-        "customers.id",
-        "users.name",
-        "users.email",
-        "users.phone",
-        "users.identification_number",
-        "users.document_type",
-        "users.birth_date"
-      )
-      .pojo();
-
+    const customers = await Customer.all();
     return response.ok(customers);
   }
 
+  public async findByIdWithUser({ params, response }: HttpContextContract) {
+    if (!params.id) {
+      throw new BadRequestException("Customer ID is required");
+    }
+
+    const customer = await Customer.findOrFail(params.id);
+    const userInfo = await SecurityService.getUserById(customer.user_id);
+
+    return response.ok({
+      ...customer.toJSON(),
+      user: userInfo,
+    });
+  }
+
   public async create({ request, response }: HttpContextContract) {
-    const body: CreateCustomerDTO = await request.validate(CustomerValidator);
-    const customer = await CustomerService.createCustomer(body);
+    const body = await request.validate(CustomerValidator);
+
+    await SecurityService.validateUserExists(body.user_id);
+
+    const customer = await Customer.create(body);
     return response.created(customer);
   }
 
@@ -35,26 +38,19 @@ export default class CustomersController {
     if (!params.id) {
       throw new BadRequestException("Customer ID is required");
     }
-    const customer = await Customer.query()
-      .where("id", params.id)
-      .preload("user")
-      .firstOrFail();
 
-    if (!customer) {
-      throw new NotFoundException("Customer not found");
-    }
+    const customer = await Customer.findOrFail(params.id);
+    const body = await request.validate(CustomerUpdateValidator);
 
-    request.updateQs({ user_id: customer.user_id });
+    await SecurityService.validateUserExists(body.user_id);
 
-    const body: CreateCustomerDTO = await request.validate(
-      CustomerUpdateValidator
-    );
+    customer.merge(body);
+    await customer.save();
 
-    const updateCustomer = await CustomerService.updateCustomer(customer, body);
     return response.ok({
       status: "success",
       message: "Customer updated successfully",
-      data: updateCustomer,
+      data: customer,
     });
   }
 
@@ -62,11 +58,10 @@ export default class CustomersController {
     if (!params.id) {
       throw new BadRequestException("Customer ID required");
     }
-    const customer = await Customer.find(params.id);
-    if (!customer) {
-      throw new NotFoundException("Customer not found");
-    }
+
+    const customer = await Customer.findOrFail(params.id);
     await customer.delete();
+
     return response.ok({
       status: "success",
       message: "Customer deleted successfully",
