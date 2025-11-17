@@ -69,15 +69,15 @@ export default class CustomersController {
     const customer = await Customer.findOrFail(params.id);
     const body = await request.validate(CustomerUpdateValidator);
 
-    await SecurityService.validateUserExists(body.user_id);
+    await SecurityService.validateUserExists(params.id);
 
-    customer.merge(body);
-    await customer.save();
-
+    await SecurityService.updateUser(customer.user_id, {
+      name: body.name? body.name : undefined,
+      email: body.email? body.email : undefined,
+    });
     return response.ok({
       status: "success",
       message: "Customer updated successfully",
-      data: customer,
     });
   }
 

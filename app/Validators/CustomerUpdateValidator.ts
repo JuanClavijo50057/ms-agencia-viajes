@@ -9,21 +9,12 @@ export default class CustomerUpdateValidator {
   })
 
   public schema = schema.create({
-    user_id: schema.string({}, [
-      rules.unique({
-        table: 'customers',
-        column: 'user_id',
-        whereNot: { id: this.refs.customerId },
-      }),
-      rules.minLength(24),
-      rules.maxLength(24),
-    ]),
+    email: schema.string.optional({}, [rules.email()]),
+    name: schema.string.optional({}, [rules.minLength(3), rules.maxLength(255)]),
   })
 
   public messages: CustomMessages = {
-    'user_id.required': 'User ID is required',
-    'user_id.unique': 'This user is already registered as a customer',
-    'user_id.minLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
-    'user_id.maxLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+    'name.minLength': 'Name must be at least 3 characters long',
+    'name.maxLength': 'Name cannot exceed 255 characters',
   }
 }

@@ -39,4 +39,14 @@ export default class SecurityService {
   public static async validateUserExists(userId: string): Promise<void> {
     await this.getUserById(userId);
   }
+  public static async updateUser(userId: string,payload: Partial<SecurityUser>): Promise<void> {
+     await axios.patch(`${this.baseUrl}/api/users/${userId}`, payload).catch((error: AxiosError) => {
+      if (error.response?.status === 404) {
+        throw new NotFoundException(
+          `User with ID ${userId} not found in security service`
+        );
+      }
+    });
+
+  }
 }
