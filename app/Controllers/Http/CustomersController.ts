@@ -8,7 +8,32 @@ import SecurityService from "App/Services/SecurityService";
 export default class CustomersController {
   public async findAll({ response }: HttpContextContract) {
     const customers = await Customer.all();
-    return response.ok(customers);
+
+    const customersWithUserInfo = await Promise.allSettled(
+      customers.map(async (customer) => {
+        const userInfo = await SecurityService.getUserById(customer.user_id);
+        return {
+          ...customer.toJSON(),
+          user: {
+            name: userInfo.name,
+            email: userInfo.email,
+          },
+        };
+      })
+    );
+
+    const results = customersWithUserInfo.map((result, index) => {
+      if (result.status === "fulfilled") {
+        return result.value;
+      } else {
+        return {
+          ...customers[index].toJSON(),
+          user: null,
+        };
+      }
+    });
+
+    return response.ok(results);
   }
 
   public async findByIdWithUser({ params, response }: HttpContextContract) {
