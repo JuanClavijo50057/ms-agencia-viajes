@@ -24,12 +24,12 @@ export default class CustomerValidator {
    *    ```
    */
   public schema = schema.create({
-    user_id: schema.string({}, [
-      rules.unique({ table: 'customers', column: 'user_id' }),
-      rules.minLength(24),
-      rules.maxLength(24),
-    ]),
-  })
+  user_id: schema.string({}, [
+    rules.required(),
+    rules.minLength(24),
+    rules.maxLength(24),
+    rules.externalUserExists(),
+  ]),  })
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`

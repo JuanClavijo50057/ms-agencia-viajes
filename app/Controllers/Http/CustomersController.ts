@@ -51,12 +51,14 @@ export default class CustomersController {
   }
 
   public async create({ request, response }: HttpContextContract) {
-    const body = await request.validate(CustomerValidator);
+    try {
+      const body = await request.validate(CustomerValidator);
+      const customer = await Customer.create(body);
+      return response.created(customer);
+    } catch (error) {
+      response.status(400).send({ message: error });
+    }
 
-    await SecurityService.validateUserExists(body.user_id);
-
-    const customer = await Customer.create(body);
-    return response.created(customer);
   }
 
   public async update({ params, request, response }: HttpContextContract) {
