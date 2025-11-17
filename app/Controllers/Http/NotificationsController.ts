@@ -1,7 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Driver from 'App/Models/Driver';
 import { NotificationService } from 'App/Services/NotificationService';
-import { SecurityService } from 'App/Services/SecurityService';
+import  SecurityService from 'App/Services/SecurityService';
 
 export default class NotificationsController {
     public async alertNewNotification({ response }: HttpContextContract) {
