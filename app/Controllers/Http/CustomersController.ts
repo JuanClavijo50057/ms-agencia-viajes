@@ -14,10 +14,10 @@ export default class CustomersController {
         const userInfo = await SecurityService.getUserById(customer.user_id);
         return {
           ...customer.toJSON(),
-          user: {
-            name: userInfo.name,
-            email: userInfo.email,
-          },
+
+          name: userInfo.name,
+          email: userInfo.email,
+
         };
       })
     );
