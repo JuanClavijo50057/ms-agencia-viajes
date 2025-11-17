@@ -45,8 +45,11 @@ export default class JourneysController {
 
     }
     public async findAll({ response }: HttpContextContract) {
-        const journeys = await Journey.all();
-        return response.ok(journeys);
+    const journeys = await Journey
+        .query()
+        .preload('origin')
+        .preload('destination')
 
+    return response.ok(journeys)
     }
 }

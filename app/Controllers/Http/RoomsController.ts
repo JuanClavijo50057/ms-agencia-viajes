@@ -6,7 +6,9 @@ import RoomValidator from 'App/Validators/RoomValidator'
 
 export default class RoomsController {
     public async findAll({ response }: HttpContextContract) {
-        const rooms = await Room.all()
+        const rooms = await Room
+            .query()
+            .preload('hotel')
         return response.ok(rooms)
     }
 
