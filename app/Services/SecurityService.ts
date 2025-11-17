@@ -1,15 +1,42 @@
-import axios from 'axios';
+import axios, { AxiosError } from "axios";
+import Env from "@ioc:Adonis/Core/Env";
+import NotFoundException from "App/Exceptions/NotFoundException";
+import BadRequestException from "App/Exceptions/BadRequestException";
 
-export class SecurityService {
-  private static baseUrl = process.env.MS_SECURITY_URL;
+interface SecurityUser {
+  _id: string;
+  name: string;
+  email: string;
+  isOauth: boolean;
+}
 
-  static async getUserById(userId: string) {
-    const response = await axios.get(`${this.baseUrl}/users/${userId}`);
+export default class SecurityService {
+  private static baseUrl = Env.get("MS_SECURITY");
+
+  public static async getUserById(userId: string): Promise<SecurityUser> {
+    const response = await axios
+      .get<SecurityUser>(`${this.baseUrl}/api/users/${userId}`)
+      .catch((error: AxiosError) => {
+        if (error.response?.status === 404) {
+          throw new NotFoundException(
+            `User with ID ${userId} not found in security service`
+          );
+        }
+        if (error.response?.status === 400) {
+          throw new BadRequestException("Invalid user ID format");
+        }
+        throw new BadRequestException("Unable to connect to security service");
+      });
+
     return response.data;
   }
 
-  static async getManyUsers(ids: number[]) {
-    const response = await axios.post(`${this.baseUrl}/users/many`, { ids });
-    return response.data;
+  public static async getUserEmail(userId: string): Promise<string> {
+    const user = await this.getUserById(userId);
+    return user.email;
+  }
+
+  public static async validateUserExists(userId: string): Promise<void> {
+    await this.getUserById(userId);
   }
 }

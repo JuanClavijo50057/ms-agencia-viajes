@@ -1,38 +1,61 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { CreateGuideDTO } from "App/DTOs/Guide/createGuideDTO";
 import BadRequestException from "App/Exceptions/BadRequestException";
-import NotFoundException from "App/Exceptions/NotFoundException";
 import Guide from "App/Models/Guide";
-
-import GuideService from "App/Services/GuideService";
 import GuideUpdateValidator from "App/Validators/GuideUpdateValidator";
 import GuideValidator from "App/Validators/GuideValidator";
+import SecurityService from "App/Services/SecurityService";
 
 export default class GuidesController {
   public async findAll({ response }: HttpContextContract) {
-    const guides = await Guide.query()
-      .join("users", "users.id", "=", "guides.user_id")
-      .select(
-        "guides.id",
-        "users.name",
-        "users.email",
-        "users.phone",
-        "users.identification_number",
-        "users.document_type",
-        "users.birth_date",
-        "guides.hire_date",
-        "guides.active"
-      )
-      .pojo();
-    return response.ok(guides);
+    const guides = await Guide.all();
+
+    const guidesWithUserInfo = await Promise.allSettled(
+      guides.map(async (guide) => {
+        const userInfo = await SecurityService.getUserById(guide.user_id);
+        return {
+          ...guide.toJSON(),
+          user: {
+            name: userInfo.name,
+            email: userInfo.email,
+          },
+        };
+      })
+    );
+
+    const results = guidesWithUserInfo.map((result, index) => {
+      if (result.status === "fulfilled") {
+        return result.value;
+      } else {
+        return {
+          ...guides[index].toJSON(),
+          user: null,
+        };
+      }
+    });
+
+    return response.ok(results);
+  }
+
+  public async findByIdWithUser({ params, response }: HttpContextContract) {
+    if (!params.id) {
+      throw new BadRequestException("Guide ID is required");
+    }
+
+    const guide = await Guide.findOrFail(params.id);
+    const userInfo = await SecurityService.getUserById(guide.user_id);
+
+    return response.ok({
+      ...guide.toJSON(),
+      user: userInfo,
+    });
   }
 
   public async create({ request, response }: HttpContextContract) {
-    const body: CreateGuideDTO = await request.validate(GuideValidator);
-    const guide = await GuideService.createGuide(body);
-    if (!guide) {
-      throw new Error("Error creating guide");
-    }
+    const body = await request.validate(GuideValidator);
+
+    await SecurityService.validateUserExists(body.user_id);
+
+    const guide = await Guide.create(body);
     return response.created(guide);
   }
 
@@ -41,24 +64,18 @@ export default class GuidesController {
       throw new BadRequestException("Guide ID is required");
     }
 
-    const guide = await Guide.query()
-      .where("id", params.id)
-      .preload("user")
-      .firstOrFail();
+    const guide = await Guide.findOrFail(params.id);
+    const body = await request.validate(GuideUpdateValidator);
 
-    if (!guide) {
-      throw new NotFoundException("Guide not found");
-    }
+    await SecurityService.validateUserExists(body.user_id);
 
-    request.updateQs({ user_id: guide.user_id });
-
-    const body: CreateGuideDTO = await request.validate(GuideUpdateValidator);
-    const updateGuide = await GuideService.updateGuide(guide, body);
+    guide.merge(body);
+    await guide.save();
 
     return response.ok({
       status: "success",
       message: "Guide updated successfully",
-      data: updateGuide,
+      data: guide,
     });
   }
 
@@ -66,11 +83,10 @@ export default class GuidesController {
     if (!params.id) {
       throw new BadRequestException("Guide ID required");
     }
-    const guide = await Guide.find(params.id);
-    if (!guide) {
-      throw new NotFoundException("Guide not found");
-    }
+
+    const guide = await Guide.findOrFail(params.id);
     await guide.delete();
+
     return response.ok({
       status: "success",
       message: "Guide deleted successfully",

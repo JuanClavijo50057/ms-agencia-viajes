@@ -24,15 +24,11 @@ export default class GuideValidator {
    *    ```
    */
   public schema = schema.create({
-    name: schema.string(),
-    email: schema.string({}, [
-      rules.email(),
-      rules.unique({ table: 'users', column: 'email' }),
+    user_id: schema.string({}, [
+      rules.unique({ table: 'guides', column: 'user_id' }),
+      rules.minLength(24),
+      rules.maxLength(24),
     ]),
-    phone: schema.string(),
-    identification_number: schema.string(),
-    document_type: schema.string(),
-    birth_date: schema.date({ format: 'yyyy-MM-dd' }),
     active: schema.boolean(),
     hire_date: schema.date({ format: 'yyyy-MM-dd' }),
   })
@@ -49,6 +45,12 @@ export default class GuideValidator {
    *
    */
   public messages: CustomMessages = {
+    'user_id.required': 'User ID is required',
+    'user_id.unique': 'This user is already registered as a guide',
+    'user_id.minLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+    'user_id.maxLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+    'active.required': 'Active status is required',
+    'active.boolean': 'Active must be a boolean value',
     'hire_date.required': 'The hire_date field is required.',
     'hire_date.date': 'The hire_date must be a valid date in the format YYYY-MM-DD.',
   }

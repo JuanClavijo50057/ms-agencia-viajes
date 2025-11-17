@@ -4,30 +4,26 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 export default class CustomerUpdateValidator {
   constructor(protected ctx: HttpContextContract) {}
 
+  public refs = schema.refs({
+    customerId: this.ctx.params.id,
+  })
+
   public schema = schema.create({
-    name: schema.string(),
-    email: schema.string({}, [
-      rules.email(),
+    user_id: schema.string({}, [
       rules.unique({
-        table: 'users',
-        column: 'email',
-        whereNot: { id: this.ctx.request.qs().user_id }
+        table: 'customers',
+        column: 'user_id',
+        whereNot: { id: this.refs.customerId },
       }),
+      rules.minLength(24),
+      rules.maxLength(24),
     ]),
-    phone: schema.string(),
-    identification_number: schema.string({}, [
-      rules.unique({
-        table: 'users',
-        column: 'identification_number',
-        whereNot: { id: this.ctx.request.qs().user_id }
-      }),
-    ]),
-    document_type: schema.string(),
-    birth_date: schema.date({ format: 'yyyy-MM-dd' }),
   })
 
   public messages: CustomMessages = {
-    'email.unique': 'This email is already in use by another user',
-    'identification_number.unique': 'This identification number is already in use by another user',
+    'user_id.required': 'User ID is required',
+    'user_id.unique': 'This user is already registered as a customer',
+    'user_id.minLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
+    'user_id.maxLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
   }
 }

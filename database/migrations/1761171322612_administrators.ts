@@ -1,29 +1,27 @@
-import BaseSchema from '@ioc:Adonis/Lucid/Schema'
+import BaseSchema from "@ioc:Adonis/Lucid/Schema";
 
 export default class extends BaseSchema {
-  protected tableName = 'administrators'
+  protected tableName = "administrators";
 
-  public async up () {
+  public async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
-      table.integer('user_id')
-        .unsigned()
+      table.increments("id");
+      table
+        .string("user_id", 255)
         .notNullable()
         .unique()
-        .references('id')
-        .inTable('users')
-        .onDelete('CASCADE')
-      table.boolean('active').notNullable()
-      table.date('hire_date').notNullable()
+        .comment("MongoDB User ID from ms-security");
+      table.boolean("active").notNullable();
+      table.date("hire_date").notNullable();
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
-      table.timestamp('created_at', { useTz: true })
-      table.timestamp('updated_at', { useTz: true })
-    })
+      table.timestamp("created_at", { useTz: true });
+      table.timestamp("updated_at", { useTz: true });
+    });
   }
 
-  public async down () {
-    this.schema.dropTable(this.tableName)
+  public async down() {
+    this.schema.dropTable(this.tableName);
   }
 }
