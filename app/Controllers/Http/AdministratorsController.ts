@@ -9,7 +9,34 @@ import SecurityService from "App/Services/SecurityService";
 export default class AdministratorsController {
   public async findAll({ response }: HttpContextContract) {
     const administrators = await Administrator.all();
-    return response.ok(administrators);
+
+    const administratorsWithUserInfo = await Promise.allSettled(
+      administrators.map(async (administrator) => {
+        const userInfo = await SecurityService.getUserById(
+          administrator.user_id
+        );
+        return {
+          ...administrator.toJSON(),
+          user: {
+            name: userInfo.name,
+            email: userInfo.email,
+          },
+        };
+      })
+    );
+
+    const results = administratorsWithUserInfo.map((result, index) => {
+      if (result.status === "fulfilled") {
+        return result.value;
+      } else {
+        return {
+          ...administrators[index].toJSON(),
+          user: null,
+        };
+      }
+    });
+
+    return response.ok(results);
   }
 
   public async findByIdWithUser({ params, response }: HttpContextContract) {

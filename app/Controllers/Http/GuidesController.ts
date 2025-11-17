@@ -8,7 +8,32 @@ import SecurityService from "App/Services/SecurityService";
 export default class GuidesController {
   public async findAll({ response }: HttpContextContract) {
     const guides = await Guide.all();
-    return response.ok(guides);
+
+    const guidesWithUserInfo = await Promise.allSettled(
+      guides.map(async (guide) => {
+        const userInfo = await SecurityService.getUserById(guide.user_id);
+        return {
+          ...guide.toJSON(),
+          user: {
+            name: userInfo.name,
+            email: userInfo.email,
+          },
+        };
+      })
+    );
+
+    const results = guidesWithUserInfo.map((result, index) => {
+      if (result.status === "fulfilled") {
+        return result.value;
+      } else {
+        return {
+          ...guides[index].toJSON(),
+          user: null,
+        };
+      }
+    });
+
+    return response.ok(results);
   }
 
   public async findByIdWithUser({ params, response }: HttpContextContract) {
