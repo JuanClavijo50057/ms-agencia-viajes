@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import City from './City'
 
 export default class Journey extends BaseModel {
   @column({ isPrimary: true })
@@ -9,10 +10,11 @@ export default class Journey extends BaseModel {
   @column()
   public destination_id: number
 
-  @belongsTo(() => Journey, { foreignKey: 'origin_id' })
-  public origin: BelongsTo<typeof Journey>
-  @belongsTo(() => Journey, { foreignKey: 'destination_id' })
-  public destination: BelongsTo<typeof Journey>
+  @belongsTo(() => City, { foreignKey: 'origin_id' })
+  public origin: BelongsTo<typeof City>
+
+  @belongsTo(() => City, { foreignKey: 'destination_id' })
+  public destination: BelongsTo<typeof City>
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
