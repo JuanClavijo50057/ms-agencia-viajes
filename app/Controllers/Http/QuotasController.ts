@@ -4,7 +4,7 @@ import QuotaValidator from 'App/Validators/QuotaValidator';
 
 export default class QuotasController {
     public async findAll({response}:HttpContextContract){
-        const quotas = await Quota.all();
+        const quotas = await Quota.query().preload('travel');
         return response.ok(quotas)
     }
 
