@@ -1,9 +1,9 @@
 import Route from '@ioc:Adonis/Core/Route'
 Route.group(() => {
     Route.get("/", "CustomersController.findAll");
-    Route.get("/:id", "CustomersController.findByIdWithUser");
-    Route.get("/users-no-customer", "CustomersController.allUsersWithoutCustomers");
     Route.post("/", "CustomersController.create");
+    Route.get("/users-no-customer" , "CustomersController.allUsersWithoutCustomers");
+    Route.get("/:id", "CustomersController.findByIdWithUser");
     Route.patch("/:id", "CustomersController.update");
     Route.delete("/:id", "CustomersController.delete");
 }).prefix("/customer");

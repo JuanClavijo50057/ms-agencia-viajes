@@ -112,16 +112,16 @@ export default class CustomersController {
 
       SecurityService.token = authHeader;
 
-      // const customers = await Customer.all();
-      // const customerUserIds = customers.map((c) => c.user_id);
+      const customers = await Customer.all();
+      const customerUserIds = customers.map((c) => c.user_id);
 
-      // const allUsers = await SecurityService.getAllUsers();
-      // console.log(allUsers);
-      // const usersWithoutCustomers = allUsers.filter(
-      //   (user) => !customerUserIds.includes(user.id)
-      // );
+      const allUsers = await SecurityService.getAllUsers();
+      console.log(allUsers);
+      const usersWithoutCustomers = allUsers.filter(
+        (user) => !customerUserIds.includes(user._id)
+      );
 
-      return response.ok("usersWithoutCustomers");
+      return response.ok(usersWithoutCustomers);
     } catch (error) {
       response.status(500).send({ message: error });
     }
