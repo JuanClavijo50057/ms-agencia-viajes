@@ -13,23 +13,24 @@ export default class Security {
       }
       try {
         const result = await axios.post(`${Env.get('MS_SECURITY')}/api/public/security/permissions-validation`, thePermission,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
             }
-          )
+          }
+        )
         console.log("La respuesta de ms-security >" + result.data + "<")
         if (result.data == true) {
           console.log(result.data)
           await next()
         } else {
-          console.log("no puede ingresar")
-          return response.status(401)
+          return response.status(403)
         }
       } catch (error) {
-        console.error(error)
-        return response.status(401)
+        const status = error.response?.status || 403
+        console.log(status);
+        
+        return response.status(status)
       }
     } else {
       return response.status(401)
