@@ -15,7 +15,7 @@ export default class TravelsController {
     }
 
     public async update({params, request, response}: HttpContextContract) {
-        const body = request.body();
+        const body = await request.validate(TravelValidator);
         if (!params.id) {
             throw new Error('Travel ID is required');
         }
