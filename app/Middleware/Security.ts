@@ -28,7 +28,6 @@ export default class Security {
         }
       } catch (error) {
         const status = error.response?.status || 403
-        console.log(status);
         
         return response.status(status)
       }
