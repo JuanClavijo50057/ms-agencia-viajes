@@ -9,10 +9,10 @@ export default class ServiceTransportation extends BaseModel {
   public id: number
 
   @column.date()
-  public startDate: DateTime
+  public start_date: DateTime
 
   @column.date()
-  public endDate: DateTime
+  public end_date: DateTime
 
   @column()
   public cost: number
@@ -24,7 +24,7 @@ export default class ServiceTransportation extends BaseModel {
   public journey_id: number
 
   @belongsTo(() => Vehicle, {
-    foreignKey: 'vehicle_id',
+    foreignKey: 'transportation_id',
   })
   public vehicle: BelongsTo<typeof Vehicle>
 

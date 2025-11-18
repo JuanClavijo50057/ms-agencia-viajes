@@ -5,7 +5,13 @@ import ServiceTransportationValidator from 'App/Validators/ServiceTransportation
 
 export default class ServiceTransportationsController {
     public async findAll({ response }: HttpContextContract) {
-        const transportations = await ServiceTransportation.all();
+        const transportations = await ServiceTransportation
+            .query()
+            .preload('vehicle')
+            .preload('journey', (journeyQuery) => {
+                journeyQuery.preload('origin');
+                journeyQuery.preload('destination');
+            });
         return response.ok(transportations);
     }
     
