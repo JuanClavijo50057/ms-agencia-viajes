@@ -24,13 +24,13 @@ export default class ServiceTransportationValidator {
    *    ```
    */
   public schema = schema.create({
-    startDate: schema.date({
+    start_date: schema.date({
       format: 'yyyy-MM-dd'
     }),
-    endDate: schema.date({
+    end_date: schema.date({
       format: 'yyyy-MM-dd'
     }, [
-      rules.afterField('startDate')
+      rules.afterField('start_date')
     ]),
     cost: schema.number([
       rules.unsigned(),
