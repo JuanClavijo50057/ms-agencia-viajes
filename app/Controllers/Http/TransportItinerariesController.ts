@@ -4,7 +4,19 @@ import TransportItineraryValidator from 'App/Validators/TransportItineraryValida
 
 export default class TransportItinerariesController {
     public async findAll({response}:HttpContextContract){
-        const TransportItineraries = await TransportItinerary.all();
+        const TransportItineraries = await TransportItinerary
+            .query()
+            .preload('travel')
+            .preload('journey', (query) => {
+                query.preload('origin')
+                query.preload('destination')
+            })
+            .preload('serviceTransportation', (query) => {
+                query.preload('vehicle')
+            })
+            .preload('roomTransportItineraries', (query) => {
+                query.preload('room')
+            });
         return response.ok(TransportItineraries)
     }
 
