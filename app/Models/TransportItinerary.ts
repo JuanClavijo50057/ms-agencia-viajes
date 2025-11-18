@@ -3,6 +3,7 @@ import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:
 import Travel from './Travel'
 import ServiceTransportation from './ServiceTransportation'
 import RoomTransportItinerary from './RoomTransportItinerary'
+import Journey from './Journey'
 
 export default class TransportItinerary extends BaseModel {
   @column({ isPrimary: true })
@@ -31,10 +32,10 @@ export default class TransportItinerary extends BaseModel {
   })
   public travel: BelongsTo<typeof Travel>
 
-  @belongsTo(() => Travel, {
+  @belongsTo(() => Journey, {
     foreignKey: 'journey_id'
   })
-  public journey: BelongsTo<typeof Travel>
+  public journey: BelongsTo<typeof Journey>
 
   @belongsTo(() => ServiceTransportation, {
     foreignKey: 'service_transportation_id'
