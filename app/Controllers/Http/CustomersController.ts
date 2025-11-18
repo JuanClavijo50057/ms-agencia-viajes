@@ -9,12 +9,12 @@ export default class CustomersController {
   public async findAll({ response, request }: HttpContextContract) {
     const customers = await Customer.all();
 
-    const authHeader = request.header('authorization')
+    const authHeader = request.header("authorization");
 
     if (!authHeader) {
-      return response.unauthorized({ message: 'Token no enviado' })
+      return response.unauthorized({ message: "Token no enviado" });
     }
-    SecurityService.token = authHeader
+    SecurityService.token = authHeader;
     const customersWithUserInfo = await Promise.allSettled(
       customers.map(async (customer) => {
         const userInfo = await SecurityService.getUserById(customer.user_id);
@@ -23,7 +23,6 @@ export default class CustomersController {
 
           name: userInfo.name,
           email: userInfo.email,
-
         };
       })
     );
@@ -64,7 +63,6 @@ export default class CustomersController {
     } catch (error) {
       response.status(400).send({ message: error });
     }
-
   }
 
   public async update({ params, request, response }: HttpContextContract) {
@@ -99,5 +97,33 @@ export default class CustomersController {
       status: "success",
       message: "Customer deleted successfully",
     });
+  }
+
+  public async allUsersWithoutCustomers({
+    response,
+    request,
+  }: HttpContextContract) {
+    try {
+      console.log("Fetching users without customers");
+      const authHeader = request.header("authorization");
+      if (!authHeader) {
+        return response.unauthorized({ message: "Token no enviado" });
+      }
+
+      SecurityService.token = authHeader;
+
+      // const customers = await Customer.all();
+      // const customerUserIds = customers.map((c) => c.user_id);
+
+      // const allUsers = await SecurityService.getAllUsers();
+      // console.log(allUsers);
+      // const usersWithoutCustomers = allUsers.filter(
+      //   (user) => !customerUserIds.includes(user.id)
+      // );
+
+      return response.ok("usersWithoutCustomers");
+    } catch (error) {
+      response.status(500).send({ message: error });
+    }
   }
 }
