@@ -1,5 +1,5 @@
-import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { schema, CustomMessages, rules } from "@ioc:Adonis/Core/Validator";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 export default class CustomerValidator {
   constructor(protected ctx: HttpContextContract) {}
@@ -24,12 +24,14 @@ export default class CustomerValidator {
    *    ```
    */
   public schema = schema.create({
-  user_id: schema.string({}, [
-    rules.required(),
-    rules.minLength(24),
-    rules.maxLength(24),
-    rules.externalUserExists(),
-  ]),  })
+    user_id: schema.string({}, [
+      rules.trim(),
+      rules.minLength(24),
+      rules.maxLength(24),
+      rules.unique({ table: "customers", column: "user_id" }),
+      rules.externalUserExists(),
+    ]),
+  });
 
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
@@ -43,9 +45,13 @@ export default class CustomerValidator {
    *
    */
   public messages: CustomMessages = {
-    'user_id.required': 'User ID is required',
-    'user_id.unique': 'This user is already registered as a customer',
-    'user_id.minLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
-    'user_id.maxLength': 'User ID must be a valid MongoDB ObjectId (24 characters)',
-  }
+    "user_id.required": "User ID is required",
+    "user_id.unique": "This user is already registered as a customer",
+    "user_id.minLength":
+      "User ID must be a valid MongoDB ObjectId (24 characters)",
+    "user_id.maxLength":
+      "User ID must be a valid MongoDB ObjectId (24 characters)",
+    "user_id.externalUserExists":
+      "The user does not exist in the external authentication system",
+  };
 }
