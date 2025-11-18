@@ -6,12 +6,16 @@ import CustomerUpdateValidator from "App/Validators/CustomerUpdateValidator";
 import SecurityService from "App/Services/SecurityService";
 
 export default class CustomersController {
-  public async findAll({ response }: HttpContextContract) {
+  public async findAll({ response, request }: HttpContextContract) {
     const customers = await Customer.all();
 
-    const customersWithUserInfo = await Promise.allSettled(
+    const authHeader = request.header('authorization')
+
+    if (!authHeader) {
+      return response.unauthorized({ message: 'Token no enviado' })
+    } const customersWithUserInfo = await Promise.allSettled(
       customers.map(async (customer) => {
-        const userInfo = await SecurityService.getUserById(customer.user_id);
+        const userInfo = await SecurityService.getUserById(customer.user_id, authHeader);
         return {
           ...customer.toJSON(),
 
@@ -72,8 +76,8 @@ export default class CustomersController {
     await SecurityService.validateUserExists(params.id);
 
     await SecurityService.updateUser(customer.user_id, {
-      name: body.name? body.name : undefined,
-      email: body.email? body.email : undefined,
+      name: body.name ? body.name : undefined,
+      email: body.email ? body.email : undefined,
     });
     return response.ok({
       status: "success",

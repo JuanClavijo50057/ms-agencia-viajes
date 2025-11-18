@@ -1,6 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import BadRequestException from "App/Exceptions/BadRequestException";
-import NotFoundException from "App/Exceptions/NotFoundException";
 import Administrator from "App/Models/Administrator";
 import AdministratorValidator from "App/Validators/AdministratorValidator";
 import AdministratorUpdateValidator from "App/Validators/AdministratorUpdateValidator";
