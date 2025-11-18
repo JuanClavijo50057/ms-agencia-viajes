@@ -13,9 +13,11 @@ export default class CustomersController {
 
     if (!authHeader) {
       return response.unauthorized({ message: 'Token no enviado' })
-    } const customersWithUserInfo = await Promise.allSettled(
+    }
+    SecurityService.token = authHeader
+    const customersWithUserInfo = await Promise.allSettled(
       customers.map(async (customer) => {
-        const userInfo = await SecurityService.getUserById(customer.user_id, authHeader);
+        const userInfo = await SecurityService.getUserById(customer.user_id);
         return {
           ...customer.toJSON(),
 

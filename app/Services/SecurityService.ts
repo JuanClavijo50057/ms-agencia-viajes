@@ -12,10 +12,15 @@ interface SecurityUser {
 
 export default class SecurityService {
   private static baseUrl = Env.get("MS_SECURITY");
-
+  public static token:string;
   public static async getUserById(userId: string): Promise<SecurityUser> {
+    
     const response = await axios
-      .get<SecurityUser>(`${this.baseUrl}/api/users/${userId}`)
+      .get<SecurityUser>(`${this.baseUrl}/api/users/${userId}`, {
+        headers: {
+          Authorization: SecurityService.token ? SecurityService.token : undefined,
+        },
+      })
       .catch((error: AxiosError) => {
         if (error.response?.status === 404) {
           throw new NotFoundException(
