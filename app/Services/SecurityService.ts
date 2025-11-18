@@ -61,7 +61,6 @@ export default class SecurityService {
       const response = await axios.get(`${this.baseUrl}/api/users`, {
         headers: { Authorization: SecurityService.token },
       });
-      console.log(response.data);
       return response.data;
     } catch (error) {
       throw new Error('Error obteniendo todos los usuarios');

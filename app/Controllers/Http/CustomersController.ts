@@ -57,11 +57,42 @@ export default class CustomersController {
 
   public async create({ request, response }: HttpContextContract) {
     try {
+      // Obtener el token de autorización
+      const authHeader = request.header("authorization");
+      if (!authHeader) {
+        return response.unauthorized({
+          status: "error",
+          message: "Token de autorización no enviado",
+        });
+      }
+
+      // Configurar el token en el servicio de seguridad
+      SecurityService.token = authHeader;
+
       const body = await request.validate(CustomerValidator);
       const customer = await Customer.create(body);
-      return response.created(customer);
+      return response.created({
+        status: "success",
+        message: "Customer created successfully",
+        data: customer,
+      });
     } catch (error) {
-      response.status(400).send({ message: error });
+      console.error("Error creating customer:", error);
+
+      // Si es un error de validación
+      if (error.messages) {
+        return response.status(422).send({
+          status: "error",
+          message: "Validation failed",
+          errors: error.messages,
+        });
+      }
+
+      // Si es otro tipo de error
+      return response.status(400).send({
+        status: "error",
+        message: error.message || "Error creating customer",
+      });
     }
   }
 
@@ -112,16 +143,16 @@ export default class CustomersController {
 
       SecurityService.token = authHeader;
 
-      // const customers = await Customer.all();
-      // const customerUserIds = customers.map((c) => c.user_id);
+      const customers = await Customer.all();
+      const customerUserIds = customers.map((c) => c.user_id);
 
-      // const allUsers = await SecurityService.getAllUsers();
-      // console.log(allUsers);
-      // const usersWithoutCustomers = allUsers.filter(
-      //   (user) => !customerUserIds.includes(user.id)
-      // );
+      const allUsers = await SecurityService.getAllUsers();
+      console.log(allUsers);
+      const usersWithoutCustomers = allUsers.filter(
+        (user) => !customerUserIds.includes(user._id)
+      );
 
-      return response.ok("usersWithoutCustomers");
+      return response.ok(usersWithoutCustomers);
     } catch (error) {
       response.status(500).send({ message: error });
     }

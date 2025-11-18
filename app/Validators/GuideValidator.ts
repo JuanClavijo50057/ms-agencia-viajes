@@ -28,6 +28,7 @@ export default class GuideValidator {
       rules.unique({ table: 'guides', column: 'user_id' }),
       rules.minLength(24),
       rules.maxLength(24),
+      rules.externalUserExists(),
     ]),
     active: schema.boolean(),
     hire_date: schema.date({ format: 'yyyy-MM-dd' }),
