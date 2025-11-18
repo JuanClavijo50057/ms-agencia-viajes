@@ -27,7 +27,7 @@ export default class ServiceTransportationsController {
     }
 
     public async update({ params, request, response }: HttpContextContract) {
-        const body = request.body();
+        const body = await request.validate(ServiceTransportationValidator);
         if (!params.id) {
             throw new Error('Transportation ID is required');
         }
