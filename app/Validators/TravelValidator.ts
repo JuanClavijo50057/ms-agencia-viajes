@@ -34,8 +34,17 @@ export default class TravelValidator {
         rules.maxLength(255)
       ]
     ),
-    start_date: schema.date.optional(),
-    end_date: schema.date.optional(),
+    start_date: schema.date.optional(
+      {
+        format: "yyyy-MM-dd",
+      }
+    ),
+    end_date: schema.date.optional(
+      {
+        format: "yyyy-MM-dd",
+      },
+      [rules.afterField("start_date")]
+    ),
     price: schema.number.optional(
       [
         rules.unsigned(),
