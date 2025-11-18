@@ -35,6 +35,8 @@ export default class BankCardValidator {
       [
         rules.trim(),
         rules.unique({ table: 'bank_cards', column: 'card_number' }),
+        rules.minLength(16),
+        rules.maxLength(19)
       ]
     ),
     card_holder: schema.string(
