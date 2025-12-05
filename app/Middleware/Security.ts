@@ -4,7 +4,6 @@ import Env from '@ioc:Adonis/Core/Env'
 export default class Security {
   public async handle({ request, response }: HttpContextContract, next: () => Promise<void>) {
     let theRequest = request.toJSON()
-    console.log(theRequest);
     if (theRequest.headers.authorization) {
       let token = theRequest.headers.authorization.replace("Bearer ", "")
       let thePermission: object = {
@@ -19,16 +18,12 @@ export default class Security {
             }
           }
         )
-        console.log("La respuesta de ms-security >" + result.data + "<")
         if (result.data == true) {
-          console.log(result.data)
           await next()
         } else {
           return response.status(403)
         }
       } catch (error) {
-        console.log(error);
-        
         // Si es un error que viene del microservicio (tiene response), lo manejas
         if (axios.isAxiosError(error) && error.response) {
           const status = error.response.status || 403
