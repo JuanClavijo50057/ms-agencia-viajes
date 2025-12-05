@@ -27,10 +27,17 @@ export default class Security {
           return response.status(403)
         }
       } catch (error) {
-        const status = error.response?.status || 403
+        console.log(error);
         
-        return response.status(status)
+        // Si es un error que viene del microservicio (tiene response), lo manejas
+        if (axios.isAxiosError(error) && error.response) {
+          const status = error.response.status || 403
+          return response.status(status)
+        }
+        // Si no es un error HTTP del microservicio, lánzalo para que lo maneje el Handler global
+        throw error
       }
+
     } else {
       return response.status(401)
     }
