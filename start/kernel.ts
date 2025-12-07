@@ -41,6 +41,6 @@ Server.middleware.register([
 | Route.get('dashboard', 'UserController.dashboard').middleware('auth')
 |
 */
-Server.middleware.registerNamed({
-  security: () => import('App/Middleware/Security')
-})
+// Server.middleware.registerNamed({
+//   security: () => import('App/Middleware/Security')
+// })

@@ -1,8 +1,11 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import BadRequestException from 'App/Exceptions/BadRequestException'
 import NotFoundException from 'App/Exceptions/NotFoundException'
+import Plan from 'App/Models/Plan'
 import PlanTouristActivity from 'App/Models/PlanTouristActivity'
+import PlanTouristActivitieCreateValidator from 'App/Validators/PlanTouristActivitieCreateValidator'
 import PlanTouristActivityValidator from 'App/Validators/PlanTouristActivityValidator'
+import { request } from 'https'
 
 export default class PlanTouristActivitiesController {
     public async findAll({ response }: HttpContextContract) {
@@ -75,4 +78,68 @@ export default class PlanTouristActivitiesController {
             message: 'PlanTouristActivity deleted successfully',
         })
     }
+    public async finPlansByCity({ params, response }: HttpContextContract) {
+        const { cityId } = params
+
+        if (!cityId) {
+            return response.badRequest({ message: 'City ID is required' })
+        }
+
+        // Traemos todas las asociaciones plan-actividad de esa ciudad
+        const planTouristActivities = await PlanTouristActivity
+            .query()
+            .preload('touristActivity', (activityQuery) => {
+                activityQuery.where('city_id', cityId)
+            })
+            .preload('plan')
+
+        // Agrupamos los resultados por plan
+        const grouped: Record<number, { id: number; name: string; description: string | null, duration_days: number, is_active: boolean; activities: any[]; total_cost: number }> = {}
+
+        for (const record of planTouristActivities) {
+            const plan = record.plan
+            const activity = record.touristActivity
+
+            if (!plan || !activity) continue
+
+            // Si el plan no está aún en el grupo, se crea
+            if (!grouped[plan.id]) {
+                grouped[plan.id] = {
+                    id: plan.id,
+                    name: plan.name,
+                    description: plan.description,
+                    duration_days: plan.duration_days,
+                    is_active: plan.is_active,
+                    activities: [],
+                    total_cost: 0,
+                }
+            }
+
+            grouped[plan.id].activities.push({
+                id: activity.id,
+                name: activity.name,
+                cost: activity.price,
+            })
+
+            grouped[plan.id].total_cost += Number(activity.price || 0)
+        }
+
+        // Convertimos el objeto agrupado a arreglo
+        const result = Object.values(grouped)
+
+        return response.ok(result)
+    }
+    public async createPlanWhitActivities({ response, request }: HttpContextContract) {
+        const body = await request.validate(PlanTouristActivitieCreateValidator)
+        const bodyPlan = { name: body.name, description: body.description, duration_days: body.duration_days, is_active: body.is_active ,price: body.price}
+        const plan = await Plan.create(bodyPlan)
+        const planActivitiesData = body.activities.map((activityId) => ({
+            plan_id: plan.id,
+            tourist_activity_id: activityId,
+        }))
+
+        await PlanTouristActivity.createMany(planActivitiesData)
+        return response.created({ plan, message: 'Plan with activities created successfully' })
+    }
+
 }

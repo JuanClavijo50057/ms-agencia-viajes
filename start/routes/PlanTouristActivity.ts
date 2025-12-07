@@ -8,4 +8,6 @@ Route.group(() => {
     Route.post('/', 'PlanTouristActivitiesController.create')
     Route.put('/:id', 'PlanTouristActivitiesController.update')
     Route.delete('/:id', 'PlanTouristActivitiesController.delete')
+    Route.get('/city/:cityId', 'PlanTouristActivitiesController.finPlansByCity')
+    Route.post('/create-with-activities', 'PlanTouristActivitiesController.createPlanWhitActivities')
 }).prefix('/plan-tourist-activities')

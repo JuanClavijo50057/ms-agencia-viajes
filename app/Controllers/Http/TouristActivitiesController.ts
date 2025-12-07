@@ -72,4 +72,11 @@ export default class TouristActivitiesController {
             message: 'Tourist activity deleted successfully',
         })
     }
+    public async getActivitiesByCity({ params, response }: HttpContextContract) {
+        if (!params.cityId) {
+            throw new BadRequestException('City ID is required')
+        }
+        const activities = await TouristActivity.query().where('city_id', params.cityId)
+        return response.ok(activities)
+    }
 }

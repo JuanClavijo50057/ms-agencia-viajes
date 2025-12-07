@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.increments('id')
       table.string('name', 255).notNullable()
       table.text('description').nullable()
-      table.decimal('price', 10, 2).notNullable()
+      table.decimal('price', 10, 2).nullable()
       table.integer('duration_days').unsigned().notNullable()
       table.boolean('is_active').notNullable().defaultTo(true)
 

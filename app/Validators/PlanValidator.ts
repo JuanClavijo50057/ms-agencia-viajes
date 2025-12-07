@@ -11,7 +11,7 @@ export default class PlanValidator {
     description: schema.string.optional([
       rules.maxLength(1000)
     ]),
-    price: schema.number([
+    price: schema.number.optional([
       rules.unsigned()
     ]),
     duration_days: schema.number([
@@ -23,7 +23,6 @@ export default class PlanValidator {
 
   public messages: CustomMessages = {
     'name.required': 'The plan name is required',
-    'price.required': 'The price is required',
     'price.unsigned': 'The price must be a positive number',
     'duration_days.required': 'The duration in days is required',
     'duration_days.range': 'Duration must be between 1 and 365 days'
