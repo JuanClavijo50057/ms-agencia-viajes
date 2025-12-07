@@ -117,7 +117,6 @@ export default class TravelsController {
         // Base query
         const travelsQuery = Travel.query()
 
-        // 🔹 Si viene el userId (de seguridad), filtramos los viajes del usuario
         if (userId) {
             travelsQuery.whereHas('travelCustomers', (tcQuery) => {
                 tcQuery.whereHas('customer', (cQuery) => {
@@ -126,7 +125,6 @@ export default class TravelsController {
             })
         }
 
-        // 🔹 Cargamos todas las relaciones necesarias
         travelsQuery
             .preload('planTravels', (ptQuery) => {
                 ptQuery.preload('plan', (planQuery) => {
@@ -152,7 +150,6 @@ export default class TravelsController {
 
         const travels = await travelsQuery
 
-        // 🔹 Estructura de salida formateada
         const formatted = travels.map((travel) => ({
             id: travel.id,
             name: travel.name,
@@ -191,4 +188,101 @@ export default class TravelsController {
 
         return response.ok(formatted)
     }
+    public async getTravelStatsByMonth({ response }: HttpContextContract) {
+        try {
+            const stats = await Database
+                .from('travels')
+                .select(
+                    Database.raw("EXTRACT(MONTH FROM start_date) AS month"),
+                    Database.raw("COUNT(*) AS total_travels")
+                )
+                .groupBy('month')
+                .orderBy('month', 'asc')
+
+            const allMonths = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ]
+
+            const result = allMonths.map((name, index) => {
+                const found = stats.find((s) => Number(s.month) === index + 1)
+                return {
+                    month: name,
+                    total_travels: found ? Number(found.total_travels) : 0,
+                }
+            })
+
+            return response.ok({
+                status: 'success',
+                data: result,
+            })
+        } catch (error) {
+            console.error(error)
+            return response.status(500).send({
+                status: 'error',
+                message: 'Error al obtener los viajes por mes',
+                error: error.message,
+            })
+        }
+    }
+    public async getVehicleUsageStats({ response }: HttpContextContract) {
+        const stats = await Database
+            .from('service_transportations as st')
+            .join('vehicles as v', 'v.id', 'st.transportation_id')
+            .select('v.type')
+            .count('* as total')
+            .groupBy('v.type')
+
+        const totalCount = stats.reduce((acc, s) => acc + Number(s.total), 0)
+
+        const percentages: Record<string, number> = {}
+        stats.forEach((s) => {
+            const type = s.type.toLowerCase()
+            percentages[type] = Number(((Number(s.total) / totalCount) * 100).toFixed(2))
+        })
+
+        const result = [
+            { type: 'carro', value: percentages['carro'] || 0 },
+            { type: 'avion', value: percentages['avion'] || 0 }
+        ]
+
+        return response.ok({
+            status: 'success',
+            data: result,
+        })
+
+    }
+    public async getTravelsByMunicipality({ response }: HttpContextContract) {
+        try {
+            // 🔹 Consulta: contar viajes agrupados por ciudad destino
+            const stats = await Database
+                .from('travels as tr')
+                .join('transport_itineraries as ti', 'ti.travel_id', 'tr.id')
+                .join('journeys as jo', 'jo.id', 'ti.journey_id')
+                .join('cities as c', 'c.id', 'jo.destination_id')
+                .select('c.name as municipio')
+                .countDistinct('tr.id as quantity')
+                .groupBy('c.name')
+                .orderBy('quantity', 'desc')
+
+            // 🔹 Formato final: lista [{ municipio: 'Bogotá', quantity: 8 }, ...]
+            const result = stats.map((row) => ({
+                municipio: row.municipio,
+                quantity: Number(row.quantity),
+            }))
+
+            return response.ok({
+                status: 'success',
+                data: result,
+            })
+        } catch (error) {
+            console.error(error)
+            return response.status(500).send({
+                status: 'error',
+                message: 'Error al obtener los viajes por municipio destino',
+                error: error.message,
+            })
+        }
+    }
+
 }
