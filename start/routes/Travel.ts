@@ -5,5 +5,5 @@ Route.group(() => {
     Route.put("/:id", "TravelsController.update");
     Route.delete("/:id", "TravelsController.delete");
     Route.post("/package", "TravelsController.createPackageTravel");
-    Route.get("/package", "TravelsController.packageTravel");
+    Route.get("/package/:userId?", "TravelsController.packageTravel");
 }).prefix("/travel")

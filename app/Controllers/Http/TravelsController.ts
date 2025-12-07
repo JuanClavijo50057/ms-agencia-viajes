@@ -111,13 +111,28 @@ export default class TravelsController {
             return response.status(500).send({ error: 'Failed to create travel package', errorDetail: error.message });
         }
     }
-    public async packageTravel({ response }: HttpContextContract) {
-        const travels = await Travel.query()
+    public async packageTravel({ params, response }: HttpContextContract) {
+        const { userId } = params
+
+        // Base query
+        const travelsQuery = Travel.query()
+
+        // 🔹 Si viene el userId (de seguridad), filtramos los viajes del usuario
+        if (userId) {
+            travelsQuery.whereHas('travelCustomers', (tcQuery) => {
+                tcQuery.whereHas('customer', (cQuery) => {
+                    cQuery.where('user_id', userId)
+                })
+            })
+        }
+
+        // 🔹 Cargamos todas las relaciones necesarias
+        travelsQuery
             .preload('planTravels', (ptQuery) => {
                 ptQuery.preload('plan', (planQuery) => {
                     planQuery.preload('planTouristActivities', (ptaQuery) => {
                         ptaQuery.preload('touristActivity', (taQuery) => {
-                            taQuery.preload('city') // si tu actividad tiene ciudad asociada
+                            taQuery.preload('city')
                         })
                     })
                 })
@@ -135,6 +150,9 @@ export default class TravelsController {
                     })
             })
 
+        const travels = await travelsQuery
+
+        // 🔹 Estructura de salida formateada
         const formatted = travels.map((travel) => ({
             id: travel.id,
             name: travel.name,
