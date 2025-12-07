@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import { afterCreate, afterDelete, afterUpdate, BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Travel from './Travel'
 import ServiceTransportation from './ServiceTransportation'
 import RoomTransportItinerary from './RoomTransportItinerary'
 import Journey from './Journey'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class TransportItinerary extends BaseModel {
   @column({ isPrimary: true })

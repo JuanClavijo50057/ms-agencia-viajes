@@ -96,10 +96,8 @@ export default class TravelsController {
                         transport_itinerary_id: itineraryTransport.id,
                     }, { client: trx });
                 }
-                console.log(serviceTransportation);
-
-
             }
+            await RoomTransportItinerary.updateTravelPrice({ travel_id: travel.id } as any, trx)
             await trx.commit()
             return response.created({
                 status: 'success',

@@ -131,15 +131,29 @@ export default class PlanTouristActivitiesController {
     }
     public async createPlanWhitActivities({ response, request }: HttpContextContract) {
         const body = await request.validate(PlanTouristActivitieCreateValidator)
-        const bodyPlan = { name: body.name, description: body.description, duration_days: body.duration_days, is_active: body.is_active ,price: body.price}
-        const plan = await Plan.create(bodyPlan)
-        const planActivitiesData = body.activities.map((activityId) => ({
-            plan_id: plan.id,
-            tourist_activity_id: activityId,
-        }))
 
-        await PlanTouristActivity.createMany(planActivitiesData)
-        return response.created({ plan, message: 'Plan with activities created successfully' })
+        // 1️⃣ Crear el plan base
+        const plan = await Plan.create({
+            name: body.name,
+            description: body.description,
+            duration_days: body.duration_days,
+            is_active: body.is_active,
+            price: body.price,
+        })
+
+        // 2️⃣ Insertar cada actividad turística una por una
+        // Esto dispara automáticamente el hook @afterCreate en PlanTouristActivity
+        for (const activityId of body.activities) {
+            await PlanTouristActivity.create({
+                plan_id: plan.id,
+                tourist_activity_id: activityId,
+            })
+        }
+
+        // 3️⃣ Retornar respuesta con el plan creado
+        return response.created({
+            plan,
+            message: 'Plan with activities created successfully',
+        })
     }
-
 }
