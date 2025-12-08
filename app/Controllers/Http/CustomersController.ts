@@ -4,6 +4,8 @@ import Customer from "App/Models/Customer";
 import CustomerValidator from "App/Validators/CustomerValidator";
 import CustomerUpdateValidator from "App/Validators/CustomerUpdateValidator";
 import SecurityService from "App/Services/SecurityService";
+import UserCustomerValidator from "App/Validators/UserCustomerValidator";
+import TravelCustomer from "App/Models/TravelCustomer";
 
 export default class CustomersController {
   public async findAll({ response, request }: HttpContextContract) {
@@ -157,4 +159,20 @@ export default class CustomersController {
       response.status(500).send({ message: error });
     }
   }
+  public async createUserHowCustomer({ request, response }: HttpContextContract) {
+    const body = await request.validate(UserCustomerValidator);
+    const {travel_id,...userData}=body;
+    const user= await SecurityService.createUser(userData);
+
+    const customer = await Customer.create({user_id:user._id});
+    const customerTravel=await TravelCustomer.create({customer_id:customer.id,travel_id:travel_id});
+    return response.created({
+      status: "success",
+      message: "CustomerTravel created successfully",
+      data: customerTravel,
+    });
+      
+
+  }
+    
 }

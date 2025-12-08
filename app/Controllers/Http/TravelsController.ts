@@ -6,6 +6,7 @@ import RoomTransportItinerary from 'App/Models/RoomTransportItinerary';
 import ServiceTransportation from 'App/Models/ServiceTransportation';
 import TransportItinerary from 'App/Models/TransportItinerary';
 import Travel from 'App/Models/Travel';
+import SecurityService from 'App/Services/SecurityService';
 import TravelPackageValidator from 'App/Validators/TravelPackageValidator';
 import TravelValidator from 'App/Validators/TravelValidator';
 import { it } from 'node:test';
@@ -114,80 +115,108 @@ export default class TravelsController {
     public async packageTravel({ params, response }: HttpContextContract) {
         const { userId } = params
 
-        // Base query
         const travelsQuery = Travel.query()
 
+        // 🔹 Si viene userId, filtramos viajes asociados a ese usuario
         if (userId) {
             travelsQuery.whereHas('travelCustomers', (tcQuery) => {
                 tcQuery.whereHas('customer', (cQuery) => {
                     cQuery.where('user_id', userId)
                 })
             })
+            travelsQuery.preload('travelCustomers', (tcQuery) => {
+                tcQuery.preload('customer')
+            })
         }
 
+        // 🔹 Preload de relaciones comunes
         travelsQuery
             .preload('planTravels', (ptQuery) => {
                 ptQuery.preload('plan', (planQuery) => {
                     planQuery.preload('planTouristActivities', (ptaQuery) => {
-                        ptaQuery.preload('touristActivity', (taQuery) => {
-                            taQuery.preload('city')
-                        })
+                        ptaQuery.preload('touristActivity', (taQuery) => taQuery.preload('city'))
                     })
                 })
             })
             .preload('transportItineraries', (tiQuery) => {
                 tiQuery
-                    .preload('journey', (jQuery) => {
-                        jQuery.preload('origin').preload('destination')
-                    })
-                    .preload('serviceTransportation', (stQuery) => {
-                        stQuery.preload('vehicle')
-                    })
-                    .preload('roomTransportItineraries', (rtiQuery) => {
-                        rtiQuery.preload('room')
-                    })
+                    .preload('journey', (jQuery) => jQuery.preload('origin').preload('destination'))
+                    .preload('serviceTransportation', (stQuery) => stQuery.preload('vehicle'))
+                    .preload('roomTransportItineraries', (rtiQuery) => rtiQuery.preload('room'))
             })
 
         const travels = await travelsQuery
 
-        const formatted = travels.map((travel) => ({
-            id: travel.id,
-            name: travel.name,
-            description: travel.description,
-            start_date: travel.startDate,
-            end_date: travel.endDate,
-            price: travel.price,
-            plans: travel.planTravels.map((pt) => ({
-                id: pt.plan.id,
-                name: pt.plan.name,
-                description: pt.plan.description,
-                price: pt.plan.price,
-                duration_days: pt.plan.duration_days,
-                activities: pt.plan.planTouristActivities.map((pta) => ({
-                    id: pta.touristActivity.id,
-                    name: pta.touristActivity.name,
-                    description: pta.touristActivity.description,
-                    city: pta.touristActivity.city?.name || null,
+        let userInfos: any[] = []
+
+        if (userId) {
+            const userIds = travels
+                .flatMap(t => t.travelCustomers.map(tc => tc.customer.user_id))
+                .filter((id, index, arr) => arr.indexOf(id) === index)
+
+            userInfos = await Promise.all(
+                userIds.map(async (uid) => {
+                    try {
+                        const user = await SecurityService.getUserById(uid)
+                        return { user_id: uid, name: user.name, email: user.email }
+                    } catch {
+                        return null
+                    }
+                })
+            )
+        }
+
+        // 🔹 Estructura de salida
+        const formatted = travels.map((travel) => {
+            const baseData = {
+                id: travel.id,
+                name: travel.name,
+                description: travel.description,
+                start_date: travel.startDate,
+                end_date: travel.endDate,
+                price: travel.price,
+                plans: travel.planTravels.map((pt) => ({
+                    id: pt.plan.id,
+                    name: pt.plan.name,
+                    description: pt.plan.description,
+                    price: pt.plan.price,
+                    duration_days: pt.plan.duration_days,
+                    activities: pt.plan.planTouristActivities.map((pta) => ({
+                        id: pta.touristActivity.id,
+                        name: pta.touristActivity.name,
+                        description: pta.touristActivity.description,
+                        city: pta.touristActivity.city?.name || null,
+                    })),
                 })),
-            })),
-            itineraries: travel.transportItineraries.map((it) => ({
-                order: it.sequence,
-                origin: it.journey.origin.name,
-                destination: it.journey.destination.name,
-                vehicle: {
-                    brand: it.serviceTransportation.vehicle.brand,
-                    type: it.serviceTransportation.vehicle.type,
-                    model: it.serviceTransportation.vehicle.model,
-                },
-                rooms: it.roomTransportItineraries.map((rt) => ({
-                    number: rt.room.room_number,
-                    price_per_night: rt.room.price_per_night,
+                itineraries: travel.transportItineraries.map((it) => ({
+                    order: it.sequence,
+                    origin: it.journey.origin.name,
+                    destination: it.journey.destination.name,
+                    vehicle: {
+                        brand: it.serviceTransportation.vehicle.brand,
+                        type: it.serviceTransportation.vehicle.type,
+                        model: it.serviceTransportation.vehicle.model,
+                    },
+                    rooms: it.roomTransportItineraries.map((rt) => ({
+                        number: rt.room.room_number,
+                        price_per_night: rt.room.price_per_night,
+                    })),
                 })),
-            })),
-        }))
+            }
+
+            if (userId) {
+                return {
+                    ...baseData,
+                    customers: userInfos.filter((u) => u !== null),
+                }
+            }
+
+            return baseData
+        })
 
         return response.ok(formatted)
     }
+
     public async getTravelStatsByMonth({ response }: HttpContextContract) {
         try {
             const stats = await Database

@@ -66,4 +66,11 @@ export default class SecurityService {
       throw new Error('Error obteniendo todos los usuarios');
     }
   }
+  public static async createUser(payload: Partial<SecurityUser>): Promise<SecurityUser> {
+    const response = await axios.post<SecurityUser>(`${this.baseUrl}/api/users`, payload).catch((error: AxiosError) => {
+      throw new BadRequestException("Unable to create user in security service");
+    });
+
+    return response.data;
+  }
 }

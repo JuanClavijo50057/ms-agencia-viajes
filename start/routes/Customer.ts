@@ -6,4 +6,5 @@ Route.group(() => {
     Route.get("/:id", "CustomersController.findByIdWithUser");
     Route.patch("/:id", "CustomersController.update");
     Route.delete("/:id", "CustomersController.delete");
+    Route.post("/user-customer", "CustomersController.createUserHowCustomer");
 }).prefix("/customer");

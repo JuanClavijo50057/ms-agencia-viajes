@@ -12,6 +12,8 @@ export default class TravelCustomer extends BaseModel {
 
   @column()
   public customer_id: number
+  @column()
+  public status: 'pendig' | 'confirmed' | ''
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
