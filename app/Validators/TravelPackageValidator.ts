@@ -3,14 +3,16 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 
 export default class TravelPackageValidator {
-  constructor(protected ctx: HttpContextContract) {}
+  constructor(protected ctx: HttpContextContract) { }
 
   public schema = schema.create({
-    // 👇 aplicamos ambas reglas al array
+    user_id: schema.string({}, [
+      rules.required(),
+    ]),
     items: schema
       .array([
-        rules.sequentialDates(),  
-        rules.sequentialCities(), 
+        rules.sequentialDates(),
+        rules.sequentialCities(),
       ])
       .members(
         schema.object().members({

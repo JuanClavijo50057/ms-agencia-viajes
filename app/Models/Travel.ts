@@ -33,9 +33,7 @@ export default class Travel extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @hasMany(() => Quota, {
-    foreignKey: 'travel_id'
-  })
+
   public quotas: HasMany<typeof Quota>
 
   @hasMany(() => TravelCustomer, {

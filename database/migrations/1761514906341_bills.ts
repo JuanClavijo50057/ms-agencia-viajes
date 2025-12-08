@@ -12,7 +12,7 @@ export default class extends BaseSchema {
       table.integer('bank_card_id')
         .unsigned()
         .notNullable()
-        .references('id')
+        .references('id') 
         .inTable('bank_cards')
         .onDelete('CASCADE')
       table.integer('quota_id')

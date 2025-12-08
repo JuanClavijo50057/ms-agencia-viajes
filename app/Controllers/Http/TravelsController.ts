@@ -1,11 +1,13 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database';
+import Customer from 'App/Models/Customer';
 import Journey from 'App/Models/Journey';
 import PlanTravel from 'App/Models/PlanTravel';
 import RoomTransportItinerary from 'App/Models/RoomTransportItinerary';
 import ServiceTransportation from 'App/Models/ServiceTransportation';
 import TransportItinerary from 'App/Models/TransportItinerary';
 import Travel from 'App/Models/Travel';
+import TravelCustomer from 'App/Models/TravelCustomer';
 import SecurityService from 'App/Services/SecurityService';
 import TravelPackageValidator from 'App/Validators/TravelPackageValidator';
 import TravelValidator from 'App/Validators/TravelValidator';
@@ -63,8 +65,24 @@ export default class TravelsController {
                 name: `Viaje desde  ${body.items[0].cityFrom} hasta ${body.items[body.items.length - 1].cityTo}`,
                 startDate: body.items[0].date_from,
                 endDate: body.items[body.items.length - 1].date_to,
-            },
-                { client: trx });
+            }, { client: trx });
+
+            let customer = await Customer.query({ client: trx })
+                .where('user_id', body.user_id)
+                .first()
+
+            if (!customer) {
+               customer = await Customer.create({
+                    user_id: body.user_id,
+                }, { client: trx });
+            }
+
+            await TravelCustomer.create({
+                travel_id: travel.id,
+                customer_id: customer.id,
+                status: 'draft',
+            }, { client: trx })
+
             for (const item of body.items) {
 
                 for (const planId of item.plan_ids) {
@@ -114,23 +132,10 @@ export default class TravelsController {
     }
     public async packageTravel({ params, response }: HttpContextContract) {
         const { userId } = params
-
+        console.log("userID",userId);
+        
+        // 🔹 Base query
         const travelsQuery = Travel.query()
-
-        // 🔹 Si viene userId, filtramos viajes asociados a ese usuario
-        if (userId) {
-            travelsQuery.whereHas('travelCustomers', (tcQuery) => {
-                tcQuery.whereHas('customer', (cQuery) => {
-                    cQuery.where('user_id', userId)
-                })
-            })
-            travelsQuery.preload('travelCustomers', (tcQuery) => {
-                tcQuery.preload('customer')
-            })
-        }
-
-        // 🔹 Preload de relaciones comunes
-        travelsQuery
             .preload('planTravels', (ptQuery) => {
                 ptQuery.preload('plan', (planQuery) => {
                     planQuery.preload('planTouristActivities', (ptaQuery) => {
@@ -145,10 +150,23 @@ export default class TravelsController {
                     .preload('roomTransportItineraries', (rtiQuery) => rtiQuery.preload('room'))
             })
 
+        // 🔹 Si viene userId → filtramos por ese usuario y cargamos clientes
+        if (userId) {
+            travelsQuery
+                .whereHas('travelCustomers', (tcQuery) => {
+                    tcQuery.whereHas('customer', (cQuery) => {
+                        cQuery.where('user_id', userId)
+                    })
+                })
+                .preload('travelCustomers', (tcQuery) => {
+                    tcQuery.preload('customer')
+                })
+        }
+
         const travels = await travelsQuery
 
+        // 🔹 Si hay userId, obtenemos información desde el MS de seguridad
         let userInfos: any[] = []
-
         if (userId) {
             const userIds = travels
                 .flatMap(t => t.travelCustomers.map(tc => tc.customer.user_id))
@@ -164,17 +182,21 @@ export default class TravelsController {
                     }
                 })
             )
+            
         }
 
-        // 🔹 Estructura de salida
+        // 🔹 Formatear salida
         const formatted = travels.map((travel) => {
+            const peopleCount = travel.travelCustomers?.length || 1
+            const adjustedPrice = userId ? travel.price * peopleCount : travel.price
+
             const baseData = {
                 id: travel.id,
                 name: travel.name,
                 description: travel.description,
                 start_date: travel.startDate,
                 end_date: travel.endDate,
-                price: travel.price,
+                price: adjustedPrice,
                 plans: travel.planTravels.map((pt) => ({
                     id: pt.plan.id,
                     name: pt.plan.name,
@@ -208,6 +230,7 @@ export default class TravelsController {
                 return {
                     ...baseData,
                     customers: userInfos.filter((u) => u !== null),
+                    state: travel.travelCustomers.filter(tc => tc.status!=null).map(tc => tc.status)[0] || 'draft',
                 }
             }
 
@@ -216,7 +239,6 @@ export default class TravelsController {
 
         return response.ok(formatted)
     }
-
     public async getTravelStatsByMonth({ response }: HttpContextContract) {
         try {
             const stats = await Database

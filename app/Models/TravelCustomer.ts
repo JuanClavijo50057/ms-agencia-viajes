@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Customer from './Customer'
 import Travel from './Travel'
+import Quota from './Quota'
 
 export default class TravelCustomer extends BaseModel {
   @column({ isPrimary: true })
@@ -13,7 +14,7 @@ export default class TravelCustomer extends BaseModel {
   @column()
   public customer_id: number
   @column()
-  public status: 'pendig' | 'confirmed' | ''
+  public status: 'draft' | 'inPayment' | 'paid'
 
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
@@ -21,7 +22,12 @@ export default class TravelCustomer extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
 
-  @belongsTo(() => Customer, { 
+  @hasMany(() => Quota, {
+    foreignKey: 'travel_customer_id'
+  })
+  public quotas: HasMany<typeof Quota>
+
+  @belongsTo(() => Customer, {
     foreignKey: 'customer_id'
   })
   public customer: BelongsTo<typeof Customer>

@@ -34,10 +34,10 @@ export default class QuotaValidator {
         rules.unsigned(),
       ]
     ),
-    travel_id: schema.number(
+    travel_customer_id: schema.number(
       [
         rules.unsigned(),
-        rules.exists({ table: 'travels', column: 'id' }),
+        rules.exists({ table: 'travel_customers', column: 'id' }),
       ]
     ),
   })

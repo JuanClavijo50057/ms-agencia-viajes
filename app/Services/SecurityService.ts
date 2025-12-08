@@ -32,7 +32,8 @@ export default class SecurityService {
         }
         throw new BadRequestException("Unable to connect to security service");
       });
-
+      console.log(response.data);
+      
     return response.data;
   }
 
@@ -68,6 +69,8 @@ export default class SecurityService {
   }
   public static async createUser(payload: Partial<SecurityUser>): Promise<SecurityUser> {
     const response = await axios.post<SecurityUser>(`${this.baseUrl}/api/users`, payload).catch((error: AxiosError) => {
+      console.log(error.message);
+      
       throw new BadRequestException("Unable to create user in security service");
     });
 
