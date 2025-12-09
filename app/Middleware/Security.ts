@@ -4,10 +4,14 @@ import Env from '@ioc:Adonis/Core/Env'
 import SecurityService from 'App/Services/SecurityService';
 export default class Security {
   public async handle({ request, response }: HttpContextContract, next: () => Promise<void>) {
+    const isPublic = request.url().includes('/public/')
+    if ( isPublic) {
+      console.log("paso");
+      
+      return await next()
+    }
     let theRequest = request.toJSON()
-    console.log('Middleware Security - Request URL:', theRequest.url);
       if (theRequest.headers.authorization) {
-        console.log('Authorization Header:', theRequest.headers.authorization);
         SecurityService.token = theRequest.headers.authorization
         let token = theRequest.headers.authorization.replace("Bearer ", "")
         let thePermission: object = {
