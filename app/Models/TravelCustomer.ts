@@ -1,11 +1,13 @@
 import { DateTime } from 'luxon'
-import { afterCreate, BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import { afterCreate, afterUpdate, BaseModel, BelongsTo, belongsTo, column, HasMany, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import Customer from './Customer'
 import Travel from './Travel'
 import Quota from './Quota'
 import Conversation from './Conversation'
 import ConversationParticipant from './ConversationParticipant'
 import Database from '@ioc:Adonis/Lucid/Database'
+import { NotificationService } from 'App/Services/NotificationService'
+import SecurityService from 'App/Services/SecurityService'
 
 export default class TravelCustomer extends BaseModel {
   @column({ isPrimary: true })
@@ -118,5 +120,52 @@ export default class TravelCustomer extends BaseModel {
       }
     }
 
+  }
+  @afterUpdate()
+  public static async notifyStatusChange(travelCustomer: TravelCustomer) {
+    try {
+      // Solo notificar si el status cambió
+
+      const { customer_id, travel_id, status } = travelCustomer
+      if (status == "inPayment") return
+
+      // Obtener el user_id del customer
+      const customer = await Database.from('customers')
+        .where('id', customer_id)
+        .select('user_id')
+        .first()
+
+      if (!customer?.user_id) return
+
+      // Traer el perfil desde ms-seguridad
+      const profile = await SecurityService.getUserById(customer.user_id)
+      if (!profile?.email) return
+
+      // Obtener nombre del viaje
+      const travel = await Database.from('travels')
+        .where('id', travel_id)
+        .select('name')
+        .first()
+
+      const subject = `Actualización de tu viaje "${travel?.name || 'sin nombre'}"`
+      const message = `
+Hola ${profile.name || 'viajero'}, 
+
+
+${status === 'paid'
+          ? '🎉 ¡Felicitaciones! El pago de tu viaje está completado.'
+          : '🕓 Tu reserva ha sido creada y está pendiente de pago.'
+        }
+
+Puedes revisar el estado actual en tu cuenta dentro de la plataforma.
+
+— Equipo Agencia de Viajes
+`
+
+      await NotificationService.sendNotification(profile.email, subject, message)
+      console.log(`📧 Notificación enviada a ${profile.email} por cambio de estado a ${status}`)
+    } catch (error) {
+      console.error('❌ Error enviando notificación de estado de TravelCustomer:', error.message)
+    }
   }
 }
