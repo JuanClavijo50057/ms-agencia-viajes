@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database';
+import Customer from 'App/Models/Customer';
 import TravelCustomer from 'App/Models/TravelCustomer'
 import TravelCustomerValidator from 'App/Validators/TravelCustomerValidator';
 
@@ -73,5 +74,41 @@ export default class TravelCustomersController {
             status: 'success',
             message: 'TravelCustomer deleted successfully',
         });
+    }
+
+    public async findTravelCustomersinPaymentOrPaid({ params, response }: HttpContextContract) {
+        const user_id = params.userId;
+
+        if (!user_id) {
+            return response.status(400).send({
+                status: "error",
+                message: "userId must be a valid number",
+            });
+        }
+
+        const customers = await Customer.findBy("user_id", user_id);
+
+        if (!customers) {
+            return response.status(404).send({
+                status: "error",
+                message: "Customer not found for the given userId",
+            });
+        }
+
+        const travelCustomers = await TravelCustomer.query()
+            .where("customer_id", customers.id)
+            .andWhere((query) => {
+                query
+                    .where("status", "inPayment")
+                    .orWhere("status", "paid");
+            })
+            .preload("customer")
+            .preload("travel")
+            .preload("quotas");
+
+            return response.ok({
+                status: "success",
+                data: travelCustomers,
+            });
     }
 }
