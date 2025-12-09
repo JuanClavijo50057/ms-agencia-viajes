@@ -1,5 +1,6 @@
 import { validator } from '@ioc:Adonis/Core/Validator'
 import SecurityService from 'App/Services/SecurityService'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 validator.rule(
     'externalUserExists',
@@ -60,3 +61,35 @@ validator.rule('sequentialCities', (value, _args, options) => {
     }
   }
 })
+
+validator.rule('uniqueCompound', async (value, [table, columns]: [string, string[]], options) => {
+  if (!value) return
+
+  // ✅ Esto sí es el objeto con los datos del validador
+  const data = options.tip
+
+  // ⚠️ Protección adicional por si no se envían todos los campos
+  if (!data) return
+
+  const where: Record<string, any> = {}
+  for (const col of columns) {
+    if (data[col] !== undefined) {
+      where[col] = data[col]
+    }
+  }
+
+  // Si faltan columnas, no hacemos la validación
+  if (Object.keys(where).length < columns.length) return
+
+  const exists = await Database.from(table).where(where).first()
+  if (exists) {
+    options.errorReporter.report(
+      options.pointer,
+      'uniqueCompound',
+      `Ya existe un registro con la misma combinación (${columns.join(', ')})`,
+      options.arrayExpressionPointer
+    )
+  }
+}, () => ({
+  async: true,
+}))

@@ -3,5 +3,7 @@ declare module '@ioc:Adonis/Core/Validator' {
     externalUserExists(): Rule
     sequentialDates(): Rule
     sequentialCities(): Rule
+    uniqueCompound(table: string, columns: string[]): Rule
+
   }
 }
