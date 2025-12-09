@@ -40,6 +40,9 @@ export default class QuotaValidator {
         rules.exists({ table: 'travel_customers', column: 'id' }),
       ]
     ),
+    due_date: schema.date({
+      format: 'yyyy-MM-dd',
+    }),
   })
 
   /**

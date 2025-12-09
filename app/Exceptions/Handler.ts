@@ -9,7 +9,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
   public async handle(error: any, ctx: HttpContextContract) {
     // 👀 Esto te mostrará el contenido real del error
-    console.log('💥 Error capturado por Handler:')
+    console.log('💥 Error capturado por Handler:',error)
     console.log(JSON.stringify(error, null, 2))
 
     // ⚡ Validaciones (incluye tu CustomReporter)

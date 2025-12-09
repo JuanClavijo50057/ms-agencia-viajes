@@ -32,7 +32,6 @@ export default class SecurityService {
         }
         throw new BadRequestException("Unable to connect to security service");
       });
-      console.log(response.data);
       
     return response.data;
   }

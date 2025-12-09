@@ -132,7 +132,6 @@ export default class TravelsController {
     }
     public async packageTravel({ params, response }: HttpContextContract) {
         const { userId } = params
-        console.log("userID",userId);
         
         // 🔹 Base query
         const travelsQuery = Travel.query()

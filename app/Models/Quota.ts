@@ -25,6 +25,8 @@ export default class Quota extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+  @column.date()
+  public due_date: DateTime
 
   @belongsTo(() => TravelCustomer, {
     foreignKey: 'travel_customer_id'
@@ -46,13 +48,10 @@ export default class Quota extends BaseModel {
       .where('travel_customer_id', travelCustomerId)
       .select('status')
 
-    // 2️⃣ Verificar si todas están en 'paid'
     const allPaid = quotas.every((q) => q.status === 'paid')
 
-    // 3️⃣ Determinar nuevo estado del travel_customer
-    const newStatus = allPaid ? 'created' : 'inPayment'
+    const newStatus = allPaid ? 'paid' : 'inPayment'
 
-    // 4️⃣ Actualizar el travel_customer
     await Database.from('travel_customers')
       .where('id', travelCustomerId)
       .update({ status: newStatus, updated_at: new Date() })
