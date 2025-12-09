@@ -191,6 +191,7 @@ export default class TravelsController {
 
             const baseData = {
                 id: travel.id,
+                travel_customer_id: travel.travelCustomers?.filter(tc => tc.customer.user_id === userId)[0]?.id || null,
                 name: travel.name,
                 description: travel.description,
                 start_date: travel.startDate,

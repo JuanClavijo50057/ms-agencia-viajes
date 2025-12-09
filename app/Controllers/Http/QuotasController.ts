@@ -1,7 +1,7 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Quota from 'App/Models/Quota'
 import QuotaValidator from 'App/Validators/QuotaValidator';
-import { log } from 'console';
+import { DateTime } from 'luxon';
 
 export default class QuotasController {
     public async findAll({ response }: HttpContextContract) {
@@ -86,4 +86,34 @@ export default class QuotasController {
         }
     }
 
+    public async getQuotasByAmount({ params, response }: HttpContextContract) {
+        const { amount } = params;
+        const { travel_customer_id } = params;  
+
+        console.log('Parámetros recibidos:', { amount, travel_customer_id });
+
+        if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+            return response.badRequest({ message: 'El parámetro "amount" es inválido.' });
+        }
+
+        if (!travel_customer_id || isNaN(Number(travel_customer_id)) || Number(travel_customer_id) <= 0) {
+            return response.badRequest({ message: 'El parámetro "travel_customer_id" es inválido.' });
+        }
+
+        // Cantidad máxima de cuotas (4)
+        const quotas: Quota[] = [];
+        const maxQuotas = 4;
+
+        for (let i = 1; i <= maxQuotas; i++) {
+            const quota = new Quota();
+            quota.amount = Number((Number(amount) / i).toFixed(2));
+            quota.number_payments = 1;
+            quota.travel_customer_id = Number(travel_customer_id);
+            quota.status = 'pending';
+            quota.due_date = DateTime.now();
+            quotas.push(quota);
+        }
+
+        return response.ok(quotas);
+    }
 }

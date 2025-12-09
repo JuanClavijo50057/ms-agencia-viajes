@@ -6,4 +6,5 @@ Route.group(() => {
     Route.delete("/:id", "QuotasController.delete");
     Route.post('/pay/:id', 'QuotasController.createPayment')
     Route.post('/webhook', 'QuotasController.webhook')
+    Route.get('/:travel_customer_id/:amount', 'QuotasController.getQuotasByAmount')
 }).prefix("/quota");
