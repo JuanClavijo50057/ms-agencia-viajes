@@ -67,7 +67,13 @@ export default class SecurityService {
     }
   }
   public static async createUser(payload: Partial<SecurityUser>): Promise<SecurityUser> {
-    const response = await axios.post<SecurityUser>(`${this.baseUrl}/api/users`, payload).catch((error: AxiosError) => {
+    const response = await axios.post<SecurityUser>(`${this.baseUrl}/api/users`, payload,
+      {
+        headers: {
+          Authorization: SecurityService.token 
+        }
+      }
+    ).catch((error: AxiosError) => {
       console.log(error.message);
       
       throw new BadRequestException("Unable to create user in security service");
