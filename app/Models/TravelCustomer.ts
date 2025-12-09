@@ -45,9 +45,7 @@ export default class TravelCustomer extends BaseModel {
   public static async createConversationsForHotels(travelCustomer: TravelCustomer) {
     const travelId = travelCustomer.travel_id
     const customerId = travelCustomer.customer_id
-    console.log("creando");
 
-    // 1️⃣ Buscar todos los administradores de hotel asociados a este viaje
     const admins = await Database
       .from('transport_itineraries as ti')
       .join('room_transport_itineraries as rti', 'rti.transport_itinerary_id', 'ti.id')
@@ -56,10 +54,9 @@ export default class TravelCustomer extends BaseModel {
       .join('administrators as a', 'a.id', 'h.administrator_id')
       .where('ti.travel_id', travelId)
       .distinct('a.user_id as user_id')
-    console.log(admins);
 
-    // Si no hay administradores, salimos
     if (admins.length === 0) return
+
     const customer = await Database
       .from('customers')
       .where('id', customerId)
@@ -67,39 +64,51 @@ export default class TravelCustomer extends BaseModel {
       .first()
     if (!customer) return
 
-    // 2️⃣ Por cada admin, crear conversación
     for (const admin of admins) {
-      const conversation = await Conversation.create({
-        type: 'customer_admin',
-      })
+      const existingConversation = await Database
+        .from('conversations as c')
+        .join('conversation_participants as cp1', 'cp1.conversation_id', 'c.id')
+        .join('conversation_participants as cp2', 'cp2.conversation_id', 'c.id')
+        .where('c.type', 'customer_admin')
+        .andWhere('cp1.user_id', customer.user_id)
+        .andWhere('cp2.user_id', admin.user_id)
+        .first()
 
-      // 3️⃣ Añadir los participantes
-      await ConversationParticipant.createMany([
-        {
-          conversation_id: conversation.id,
-          user_id: customer.user_id, // el customer
-          role: 'customer',
-        },
-        {
-          conversation_id: conversation.id,
-          user_id: admin.user_id, // el admin
-          role: 'admin',
-        },
-      ])
+      if (!existingConversation) {
+        const conversation = await Conversation.create({
+          type: 'customer_admin',
+        })
+
+        await ConversationParticipant.createMany([
+          {
+            conversation_id: conversation.id,
+            user_id: customer.user_id,
+            role: 'customer',
+          },
+          {
+            conversation_id: conversation.id,
+            user_id: admin.user_id,
+            role: 'admin',
+          },
+        ])
+      }
     }
+
     const otherCustomers = await Database
       .from('travel_customers as tc')
       .join('customers as c', 'c.id', 'tc.customer_id')
       .where('tc.travel_id', travelId)
       .andWhereNot('tc.customer_id', customerId)
       .select('c.user_id as user_id', 'tc.customer_id as customer_id')
+
     for (const other of otherCustomers) {
       const existingConversation = await Database
         .from('conversations as c')
         .join('conversation_participants as cp1', 'cp1.conversation_id', 'c.id')
         .join('conversation_participants as cp2', 'cp2.conversation_id', 'c.id')
-        .where('cp1.user_id', customerId)
-        .andWhere('cp2.user_id', other.customer_id)
+        .where('c.type', 'customer_customer')
+        .andWhere('cp1.user_id', customer.user_id)
+        .andWhere('cp2.user_id', other.user_id)
         .first()
 
       if (!existingConversation) {
@@ -119,7 +128,6 @@ export default class TravelCustomer extends BaseModel {
         ])
       }
     }
-
   }
   @afterUpdate()
   public static async notifyStatusChange(travelCustomer: TravelCustomer) {
