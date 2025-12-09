@@ -34,7 +34,23 @@ export default class QuotasController {
 
     public async create({ request, response }: HttpContextContract) {
         const body = await request.validate(QuotaValidator);
-        const quota = await Quota.create(body);
+        const quota = await Quota.create({ amount: body.amount, number_payments: body.number_payments, travel_customer_id: body.travel_customer_id, due_date: body.due_date });
+        if (quota && body.isPayQuota) {
+            const invoice = quota.id
+            const amount = quota.amount
+
+            return response.ok({
+                invoice,
+                publicKey: process.env.EPAY_PUBLIC_KEY,
+                test: (process.env.EPAY_TEST || 'true') === 'true',
+                responseUrl: process.env.EPAY_RESPONSE_URL,
+                confirmationUrl: process.env.EPAY_CONFIRMATION_URL,
+                description: `Pago de cuota ${quota.id}`,
+                amount,
+                currency: 'COP',
+                external: 'true',
+            })
+        }
         return response.created(quota);
     }
 
@@ -47,7 +63,7 @@ export default class QuotasController {
         if (!quota) {
             throw new Error('Quota not found');
         }
-        quota.merge(body);  
+        quota.merge(body);
         await quota.save();
         return response.ok({
             status: 'success',
@@ -88,7 +104,7 @@ export default class QuotasController {
 
     public async getQuotasByAmount({ params, response }: HttpContextContract) {
         const { amount } = params;
-        const { travel_customer_id } = params;  
+        const { travel_customer_id } = params;
 
         console.log('Parámetros recibidos:', { amount, travel_customer_id });
 

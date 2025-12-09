@@ -43,6 +43,7 @@ export default class QuotaValidator {
     due_date: schema.date({
       format: 'yyyy-MM-dd',
     }),
+    isPayQuota: schema.boolean(),
   })
 
   /**
