@@ -72,7 +72,7 @@ export default class TravelsController {
                 .first()
 
             if (!customer) {
-               customer = await Customer.create({
+                customer = await Customer.create({
                     user_id: body.user_id,
                 }, { client: trx });
             }
@@ -118,6 +118,10 @@ export default class TravelsController {
             }
             await RoomTransportItinerary.updateTravelPrice({ travel_id: travel.id } as any, trx)
             await trx.commit()
+            await TravelCustomer.createConversationsForHotels({
+                travel_id: travel.id,
+                customer_id: customer.id,
+            } as any)
             return response.created({
                 status: 'success',
                 message: 'Travel package created successfully',
@@ -132,7 +136,7 @@ export default class TravelsController {
     }
     public async packageTravel({ params, response }: HttpContextContract) {
         const { userId } = params
-        
+
         // 🔹 Base query
         const travelsQuery = Travel.query()
             .preload('planTravels', (ptQuery) => {
@@ -181,7 +185,7 @@ export default class TravelsController {
                     }
                 })
             )
-            
+
         }
 
         // 🔹 Formatear salida
@@ -230,7 +234,7 @@ export default class TravelsController {
                 return {
                     ...baseData,
                     customers: userInfos.filter((u) => u !== null),
-                    state: travel.travelCustomers.filter(tc => tc.status!=null).map(tc => tc.status)[0] || 'draft',
+                    state: travel.travelCustomers.filter(tc => tc.status != null).map(tc => tc.status)[0] || 'draft',
                 }
             }
 

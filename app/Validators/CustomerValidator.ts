@@ -27,7 +27,7 @@ export default class CustomerValidator {
     user_id: schema.string({}, [
       rules.trim(),
       rules.minLength(24),
-      rules.maxLength(24),
+      rules.maxLength(24),  
       rules.unique({ table: "customers", column: "user_id" }),
       rules.externalUserExists(),
     ]),
