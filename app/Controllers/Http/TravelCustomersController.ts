@@ -36,7 +36,7 @@ export default class TravelCustomersController {
     })
 
     // 5️⃣ Crear registro
-    const travelCustomer = await TravelCustomer.create(data)
+    const travelCustomer = await TravelCustomer.create({status: 'draft', ...data})
 
     return response.ok({
       message: 'Cliente asociado correctamente al viaje',
