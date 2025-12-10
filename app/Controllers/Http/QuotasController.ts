@@ -122,7 +122,7 @@ export default class QuotasController {
 
         for (let i = 1; i <= maxQuotas; i++) {
             const quota = new Quota();
-            quota.amount = Number((Number(amount) / i).toFixed(2));
+            quota.amount = Math.round(Number(amount) / i);
             quota.number_payments = 1;
             quota.travel_customer_id = Number(travel_customer_id);
             quota.status = 'pending';
