@@ -5,7 +5,7 @@ Route.group(() => {
     Route.put("/:id", "TravelsController.update");
     Route.delete("/:id", "TravelsController.delete");
     Route.post("/package", "TravelsController.createPackageTravel");
-    Route.get("/package/:userId?", "TravelsController.packageTravel");
+    Route.post("/travel-package", "TravelsController.packageTravel");
     Route.get("/stats/monthly", "TravelsController.getTravelStatsByMonth");
     Route.get("/stats/type-distribution", "TravelsController.getVehicleUsageStats");
     Route.get("/stats/destination-distribution", "TravelsController.getTravelsByMunicipality");

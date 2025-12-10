@@ -134,9 +134,22 @@ export default class TravelsController {
             return response.status(500).send({ error: 'Failed to create travel package', errorDetail: error.message });
         }
     }
-    public async packageTravel({ params, response }: HttpContextContract) {
-        const { userId } = params
+    public async packageTravel({ request, response }: HttpContextContract) {
+        const { userId, owsnTravel } = request.body()
+        console.log(request.body());
 
+        if (!userId) {
+            return response.status(400).send({
+                status: "error",
+                message: "userId must bee",
+            });
+        }
+        if (owsnTravel == null) {
+            return response.status(400).send({
+                status: "error",
+                message: "owsnTravel must be provided when userId is present",
+            });
+        }
         // 🔹 Base query
         const travelsQuery = Travel.query()
             .preload('planTravels', (ptQuery) => {
@@ -154,9 +167,11 @@ export default class TravelsController {
             })
 
         // 🔹 Si viene userId → filtramos por ese usuario y cargamos clientes
-        if (userId) {
+       
+        if (owsnTravel) {
             travelsQuery
                 .whereHas('travelCustomers', (tcQuery) => {
+                    tcQuery.where('status', 'draft')
                     tcQuery.whereHas('customer', (cQuery) => {
                         cQuery.where('user_id', userId)
                     })
@@ -165,12 +180,20 @@ export default class TravelsController {
                     tcQuery.preload('customer')
                 })
         }
-
+        // 🔹 Si ownTravel = false → viajes en los que el usuario NO participa
+        else {
+            travelsQuery
+                .whereDoesntHave('travelCustomers', (tcQuery) => {
+                    tcQuery.whereHas('customer', (cQuery) => {
+                        cQuery.where('user_id', userId)
+                    })
+                })
+        }
         const travels = await travelsQuery
 
         // 🔹 Si hay userId, obtenemos información desde el MS de seguridad
         let userInfos: any[] = []
-        if (userId) {
+        if (owsnTravel) {
             const userIds = travels
                 .flatMap(t => t.travelCustomers.map(tc => tc.customer.user_id))
                 .filter((id, index, arr) => arr.indexOf(id) === index)
@@ -230,7 +253,7 @@ export default class TravelsController {
                 })),
             }
 
-            if (userId) {
+            if (owsnTravel) {
                 return {
                     ...baseData,
                     customers: userInfos.filter((u) => u !== null),
