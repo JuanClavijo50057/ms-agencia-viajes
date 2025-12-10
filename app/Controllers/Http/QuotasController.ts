@@ -1,6 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Quota from 'App/Models/Quota'
+import { generateInvoicePDF } from 'App/Services/InvoiceService';
 import QuotaValidator from 'App/Validators/QuotaValidator';
+import axios from 'axios';
 import { DateTime } from 'luxon';
 
 export default class QuotasController {
@@ -99,6 +101,26 @@ export default class QuotasController {
             quota.status = 'paid'
             await quota.save()
             console.log(`✅ Cuota con ID ${idQuota} marcada como pagada.`)
+        }
+
+        const pdfBuffer = await generateInvoicePDF(body)
+
+        try {
+            await axios.post('http://localhost:5001/notifications/send', {
+            email: body.x_customer_email,
+            subject: `Factura electrónica - ${body.x_description}`,
+            message: 'Gracias por tu pago. Adjunto encontrarás tu factura electrónica.',
+            attachments: [
+                {
+                filename: `factura_${body.x_id_factura}.pdf`,
+                content: pdfBuffer.toString('base64'),
+                },
+            ],
+            })
+
+            console.log('📧 Factura enviada correctamente al cliente.')
+        } catch (error) {
+            console.error('❌ Error enviando correo:', error.message)
         }
     }
 

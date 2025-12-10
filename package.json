@@ -28,6 +28,7 @@
     "axios": "^1.12.2",
     "epayco-sdk-node": "github:epayco/epayco-node",
     "luxon": "^3.7.2",
+    "pdfkit": "^0.17.2",
     "pg": "^8.16.3",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.2.2",
